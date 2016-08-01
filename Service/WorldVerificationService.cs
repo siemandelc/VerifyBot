@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VerifyBot.Gw2Api;
 
@@ -45,14 +46,14 @@ namespace VerifyBot.Service
 
                 if (!e.Channel.IsPrivate)
                 {
-                    if (!e.Message.Text.ToLower().Contains("!verify"))
+                    if (!e.Message.Text.ToLower().Contains("verify"))
                     {
                         await e.Message.Delete();
                         return;
                     }
                     var pm = await e.User.CreatePMChannel();
 
-                    await pm.SendMessage($"Respond to this bot with the following information: {{account-name}} {{api-key}}");
+                    await pm.SendMessage($"Respond to this bot with the following information: account-name api-key");
                     await e.Message.Delete();
 
                     return;
@@ -114,6 +115,8 @@ namespace VerifyBot.Service
             }
         }
 
+        private const string AccountNameApiKeyRegex = @"\s*(.+?\.\d+)\s+(.*?-.*?-.*?-.*?-.*)\s*$";
+
         private async Task PerformVerification(MessageEventArgs e)
         {
             try
@@ -121,16 +124,16 @@ namespace VerifyBot.Service
                 Console.WriteLine($"Begin verification for user {e.User.Name}");
                 await e.Channel.SendMessage("Starting Verification Process...");
 
-                var tokens = e.Message.Text.Split(' ');
+                var tokens = new Regex(AccountNameApiKeyRegex).Split(e.Message.Text);
 
-                if (tokens.Length != 2)
+                if (tokens.Length != 4)
                 {
                     await e.Channel.SendMessage("Invalid arguments.");
                     Console.WriteLine($"Could not verify {e.User.Name} - Bad # of arguments");
                     return;
                 }
 
-                if (tokens[1].Length != 72)
+                if (tokens[2].Length != 72)
                 {
                     await e.Channel.SendMessage("Invalid API Key.");
                     Console.WriteLine($"Could not verify {e.User.Name} - Bad API Key");
@@ -138,7 +141,7 @@ namespace VerifyBot.Service
                 }
 
                 // Check GW2 server
-                var api = new ApiFacade(tokens[1]);
+                var api = new ApiFacade(tokens[2]);
                 var account = await api.GetAccountAsync();
 
                 if (account == null)
@@ -148,7 +151,7 @@ namespace VerifyBot.Service
                     return;
                 }
 
-                if (account.Name != tokens[0])
+                if (account.Name.ToLower() != tokens[1].ToLower())
                 {
                     await e.Channel.SendMessage("API Key account does not match supplied account name. (Case matters)");
                     Console.WriteLine($"Could not verify {e.User.Name} - API Key account does not match supplied account. (Case matters)");
@@ -184,7 +187,7 @@ namespace VerifyBot.Service
                 using (var cmd = new SQLiteCommand("insert into verify VALUES (@account_id,@api_key,@discord_id)", conn))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@account_id", account.Id));
-                    cmd.Parameters.Add(new SQLiteParameter("@api_key", tokens[1]));
+                    cmd.Parameters.Add(new SQLiteParameter("@api_key", tokens[2]));
                     cmd.Parameters.Add(new SQLiteParameter("@discord_id", e.User.Id));
 
                     await cmd.ExecuteNonQueryAsync();

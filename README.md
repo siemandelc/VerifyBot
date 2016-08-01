@@ -10,3 +10,5 @@ world_id: 1001,1008
 server_id: your_discord_server_id_here   
 discord_token: your_discord_bot_token_here
 ```
+
+Test 

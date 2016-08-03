@@ -65,7 +65,9 @@ namespace VerifyBot.Service
 
         private void CheckIfDatabaseExists()
         {
-            if (!System.IO.File.Exists("Users.db"))
+            var path = System.IO.Path.Combine(AppContext.BaseDirectory, "Users.db");
+
+            if (!System.IO.File.Exists(path))
             {
                 Console.WriteLine("Database does not exist. Run the following command: dotnet ef database update");
                 throw new Exception("No Database");
@@ -107,6 +109,11 @@ namespace VerifyBot.Service
         {
             try
             {
+                if (e.Author == await this.client.GetCurrentUserAsync())
+                {
+                    return;
+                }
+
                 Console.WriteLine($"Begin verification for user {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 

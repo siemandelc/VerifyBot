@@ -17,7 +17,8 @@ namespace VerifyBot
         {
             try
             {
-                _client = new DiscordSocketClient();
+                _client = new DiscordSocketClient();
+
                 var verify = new WorldVerificationService(this._client);
                 verify.Start();
 

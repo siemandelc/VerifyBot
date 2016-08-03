@@ -18,13 +18,12 @@ namespace VerifyBot.Service
 
         private readonly VerifyContext db;
 
-        private ulong ServerID = 207497020888449024;
+        private Configuration config;
 
-        private List<int> WorldIDs;
-
-        public WorldVerificationService(IDiscordClient client)
+        public WorldVerificationService(IDiscordClient client, Configuration config)
         {
             this.client = client;
+            this.config = config;
             this.db = new VerifyContext();
         }
 
@@ -34,6 +33,11 @@ namespace VerifyBot.Service
             {
                 if (e.Channel is IGuildChannel)
                 {
+                    if ((e.Channel as IGuildChannel).Name != this.config.VerifyChannelName)
+                    {
+                        return;
+                    }
+
                     if (e.Content.ToLower().Contains("!verify"))
                     {
                         var user = e.Author as IGuildUser;
@@ -57,63 +61,10 @@ namespace VerifyBot.Service
             }
         }
 
-        public void Start()
-        {
-            LoadConfiguration();
-            CheckIfDatabaseExists();
-        }
-
-        private void CheckIfDatabaseExists()
-        {
-            var path = System.IO.Path.Combine(AppContext.BaseDirectory, "Users.db");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Console.WriteLine("Database does not exist. Run the following command: dotnet ef database update");
-                throw new Exception("No Database");
-            }
-        }
-
-        private void LoadConfiguration()
-        {
-            this.WorldIDs = new List<int>();
-            var worlds = Helper.SecretsReader.GetSecret("world_id");
-
-            foreach (var world in worlds.Split(','))
-            {
-                int worldID = 0;
-                if (int.TryParse(world, out worldID))
-                {
-                    this.WorldIDs.Add(worldID);
-                }
-                else
-                {
-                    throw new Exception("Missing WorldID(s) field in configuration file");
-                }
-            }
-
-            var serverCandidate = Helper.SecretsReader.GetSecret("server_id");
-
-            ulong serverID = 0;
-            if (ulong.TryParse(serverCandidate, out serverID))
-            {
-                this.ServerID = serverID;
-            }
-            else
-            {
-                throw new Exception("Missing ServerID Field in configuration file");
-            }
-        }
-
         private async Task PerformVerification(IMessage e)
         {
             try
             {
-                if (e.Author == await this.client.GetCurrentUserAsync())
-                {
-                    return;
-                }
-
                 Console.WriteLine($"Begin verification for user {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 
@@ -151,7 +102,7 @@ namespace VerifyBot.Service
                     return;
                 }
 
-                if (!WorldIDs.Contains(account.WorldId))
+                if (!this.config.WorldIDs.Contains(account.WorldId))
                 {
                     await e.Channel.SendMessageAsync("Account is not on JQ.");
                     Console.WriteLine($"Could not verify {e.Author.Username} - Not on JQ.");
@@ -176,7 +127,7 @@ namespace VerifyBot.Service
                 await this.db.SaveChangesAsync();
 
                 var channel = e.Channel as IGuildChannel;
-                var role = channel.Guild.Roles.Where(x => x.Name == "Verified")?.FirstOrDefault();
+                var role = channel.Guild.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
                 var user = e.Author as IGuildUser;
 
                 var currentRoles = user.Roles.ToList();

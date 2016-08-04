@@ -43,7 +43,7 @@ namespace VerifyBot.Service
                         var user = e.Author as IGuildUser;
                         var pm = await user.CreateDMChannelAsync();
 
-                        await pm.SendMessageAsync($"Respond to this bot with the following information: {{account-name}} {{api-key}} (Without the {{ or }} characters)");
+                        await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                     }
 
                     await e.DeleteAsync();
@@ -65,21 +65,21 @@ namespace VerifyBot.Service
         {
             try
             {
-                Console.WriteLine($"Begin verification for user {e.Author.Username}");
+                Console.WriteLine($"Begin verification for {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 
                 var tokens = new Regex(AccountNameApiKeyRegex).Split(e.Content);
 
                 if (tokens.Length != 4)
                 {
-                    await e.Channel.SendMessageAsync("Invalid arguments.");
+                    await e.Channel.SendMessageAsync(VerifyStrings.ParseError);
                     Console.WriteLine($"Could not verify {e.Author.Username} - Bad # of arguments");
                     return;
                 }
 
                 if (tokens[2].Length != 72)
                 {
-                    await e.Channel.SendMessageAsync("Invalid API Key.");
+                    await e.Channel.SendMessageAsync(VerifyStrings.InvalidAPIKey);
                     Console.WriteLine($"Could not verify {e.Author.Username} - Bad API Key");
                     return;
                 }
@@ -90,22 +90,22 @@ namespace VerifyBot.Service
 
                 if (account == null)
                 {
-                    await e.Channel.SendMessageAsync("Could not find that account in the GW2 API.");
+                    await e.Channel.SendMessageAsync(VerifyStrings.AccountNotInAPI);
                     Console.WriteLine($"Could not verify {e.Author.Username} - Cannont access account in GW2 API.");
                     return;
                 }
 
                 if (account.Name.ToLower() != tokens[1].ToLower())
                 {
-                    await e.Channel.SendMessageAsync("API Key account does not match supplied account name. (Case matters)");
+                    await e.Channel.SendMessageAsync(VerifyStrings.AccountNameDoesNotMatch);
                     Console.WriteLine($"Could not verify {e.Author.Username} - API Key account does not match supplied account. (Case matters)");
                     return;
                 }
 
                 if (!this.config.WorldIDs.Contains(account.WorldId))
                 {
-                    await e.Channel.SendMessageAsync("Account is not on JQ.");
-                    Console.WriteLine($"Could not verify {e.Author.Username} - Not on JQ.");
+                    await e.Channel.SendMessageAsync(VerifyStrings.AccountNotOnServer);
+                    Console.WriteLine($"Could not verify {e.Author.Username} - Not on Server.");
                     return;
                 }
 
@@ -113,7 +113,7 @@ namespace VerifyBot.Service
 
                 if (existingUser != null)
                 {
-                    await e.Channel.SendMessageAsync("Account is already verified. If you are having issues message a verifer");
+                    await e.Channel.SendMessageAsync(VerifyStrings.AccountAlreadyVerified);
                     return;
                 }
 
@@ -142,12 +142,12 @@ namespace VerifyBot.Service
                     });
                 }
 
-                await e.Channel.SendMessageAsync("Verification Process Complete. Welcome to JQ discord");
+                await e.Channel.SendMessageAsync(VerifyStrings.EndMessage);
                 Console.WriteLine($"{e.Author.Username} Verified.");
             }
             catch (Exception ex)
             {
-                await e.Channel.SendMessageAsync("Error processing your verification request. An entry has been logged.");
+                await e.Channel.SendMessageAsync(VerifyStrings.ErrorMessage);
                 Console.WriteLine($"Error: {ex.ToString()}");
             }
         }

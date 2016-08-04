@@ -9,4 +9,8 @@ You'll need to add a secrets.txt file to the directory that the executable is ru
 world_id: 1001,1008   
 server_id: your_discord_server_id_here   
 discord_token: your_discord_bot_token_here
+verify_channel: channel_name_to_monitor_for_verify_command
+verify_role: role_name_to_assign_on_verification
+admin_channel: channel_name_to_monitor_for_admin_commands
+admin_role: role_name_of_role_that_can_execute_admin_commands
 ```

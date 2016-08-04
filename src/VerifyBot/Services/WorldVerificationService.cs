@@ -39,7 +39,7 @@ namespace VerifyBot.Service
                         var user = e.Author as IGuildUser;
                         var pm = await user.CreateDMChannelAsync();
 
-                        await pm.SendMessageAsync($"Respond to this bot with the following information: {{account-name}} {{api-key}}");
+                        await pm.SendMessageAsync($"Respond to this bot with the following information: {{account-name}} {{api-key}} (Without the {{ or }} characters)");
                     }
 
                     await e.DeleteAsync();

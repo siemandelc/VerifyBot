@@ -1,0 +1,1 @@
+﻿InitialMessage: Respond to this bot with the following information: {account-name} {api-key} (Without the { or } characters)

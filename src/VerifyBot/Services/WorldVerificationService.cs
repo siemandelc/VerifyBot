@@ -113,7 +113,9 @@ namespace VerifyBot.Service
 
                 if (existingUser != null)
                 {
-                    await e.Channel.SendMessageAsync(VerifyStrings.AccountAlreadyVerified);
+                    // User already exists, update?
+                    existingUser.DiscordID = e.Author.Id;
+                    await this.db.SaveChangesAsync();                    
                     return;
                 }
 

@@ -24,8 +24,6 @@ namespace VerifyBot.Services
             this.db = new VerifyContext();
         }
 
-        private bool InProgress;
-
         public async Task Process(IMessage message)
         {
             if (message.Channel is IGuildChannel && message.Author is IGuildUser)

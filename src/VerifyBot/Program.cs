@@ -45,6 +45,7 @@ namespace VerifyBot
                 await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));
                 await client.ConnectAsync();
 
+                Console.WriteLine("VerifyBot Running...");
                 Console.Read();
             }
             catch (Exception ex)

@@ -15,7 +15,6 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "System.Net.WebSockets.Client": "4.0.1-beta-24422-01",
     "System.Resources.ResourceManager": "4.0.1",
     "System.Runtime.Serialization.Json": "4.0.2"
   },

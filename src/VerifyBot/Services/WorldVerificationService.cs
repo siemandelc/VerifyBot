@@ -46,7 +46,7 @@ namespace VerifyBot.Service
                         await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                     }
 
-                    await e.DeleteAsync();
+                    await ((IUserMessage)e).DeleteAsync();
                     return;
                 }
 

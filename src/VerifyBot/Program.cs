@@ -29,6 +29,9 @@ namespace VerifyBot
                 var verify = new WorldVerificationService(this.client, config);
                 var reverify = new ReverifyService(this.client, config);
 
+                await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));                
+                await client.ConnectAsync();
+
                 var me = await this.client.GetCurrentUserAsync();
 
                 client.MessageReceived += async (message) =>
@@ -42,11 +45,7 @@ namespace VerifyBot
                     await reverify.Process(message);
                 };
 
-                await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));
-                await client.ConnectAsync();
-
-                Console.WriteLine("VerifyBot Running...");
-                Console.Read();
+                await Task.Delay(-1);
             }
             catch (Exception ex)
             {

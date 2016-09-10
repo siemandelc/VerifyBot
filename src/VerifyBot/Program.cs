@@ -33,7 +33,7 @@ namespace VerifyBot
 
                 client.MessageReceived += async (message) =>
                 {
-                    if (message.Author == me)
+                    if (message.Author.IsBot)
                     {
                         return;
                     }

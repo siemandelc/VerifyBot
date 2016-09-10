@@ -33,6 +33,8 @@ namespace VerifyBot.Service
             {
                 if (e.Channel is IGuildChannel)
                 {
+                    var userMsg = e as IUserMessage;
+
                     if ((e.Channel as IGuildChannel).Name != this.config.VerifyChannelName)
                     {
                         return;
@@ -46,7 +48,7 @@ namespace VerifyBot.Service
                         await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                     }
 
-                    await e.DeleteAsync();
+                    await userMsg.DeleteAsync();
                     return;
                 }
 
@@ -113,24 +115,23 @@ namespace VerifyBot.Service
 
                 if (existingUser != null)
                 {
-                    // User already exists, update?
                     existingUser.DiscordID = e.Author.Id;
-                    await this.db.SaveChangesAsync();                    
-                    return;
+                }
+                else
+                {
+                    this.db.Users.Add(new User()
+                    {
+                        AccountID = account.Id,
+                        APIKey = tokens[2],
+                        DiscordID = e.Author.Id
+                    });
                 }
 
-                this.db.Users.Add(new User()
-                {
-                    AccountID = account.Id,
-                    APIKey = tokens[2],
-                    DiscordID = e.Author.Id
-                });
-
                 await this.db.SaveChangesAsync();
-
-                var channel = e.Channel as IGuildChannel;
-                var role = channel.Guild.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
-                var user = e.Author as IGuildUser;
+                                
+                var guild = await client.GetGuildAsync(this.config.ServerID);
+                var user = await guild.GetUserAsync(e.Author.Id);                               
+                var role = guild.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
 
                 var currentRoles = user.Roles.ToList();
 

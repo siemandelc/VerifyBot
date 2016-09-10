@@ -13,7 +13,7 @@ namespace VerifyBot.Services
     {
         private readonly IDiscordClient client;
 
-        private readonly VerifyContext db;
+        //private readonly VerifyContext db;
 
         private Configuration config;
 
@@ -21,95 +21,145 @@ namespace VerifyBot.Services
         {
             this.client = client;
             this.config = config;
-            this.db = new VerifyContext();
+            //this.db = new VerifyContext();
         }
 
         public async Task Process(IMessage message)
         {
-            if (message.Channel is IGuildChannel && message.Author is IGuildUser)
+            try
             {
-                if ((message.Channel as IGuildChannel).Name != this.config.AdminChannel)
+                if (message.Channel is IGuildChannel && message.Author is IGuildUser)
                 {
-                    return;
+                    if ((message.Channel as IGuildChannel).Name != this.config.AdminChannel)
+                    {
+                        return;
+                    }
+
+                    var author = message.Author as IGuildUser;
+                    var adminRole = author.Guild.Roles.FirstOrDefault(x => x.Name == this.config.AdminRole);
+
+                    if (adminRole == null)
+                    {
+                        return;
+                    }
+
+                    if (!author.Roles.Contains(adminRole))
+                    {
+                        return;
+                    }
+
+                    if (!message.Content.ToLower().Contains("!checkusers"))
+                    {
+                        return;
+                    }
                 }
 
-                var author = message.Author as IGuildUser;
-                var adminRole = author.Guild.Roles.FirstOrDefault(x => x.Name == this.config.AdminRole);
-
-                if (adminRole == null)
-                {
-                    return;
-                }
-
-                if (!author.Roles.Contains(adminRole))
-                {
-                    return;
-                }
-                              
-                if (!message.Content.ToLower().Contains("!checkusers"))
-                {
-                    return;
-                }
+                await this.CheckUsers();
             }
-
-            await this.CheckUsers();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while checking: {ex}");
+            }
         }
+
+        private async Task RemoveDatabaseUser(VerifyContext db, IGuildUser discordUser, User user, IRole role)
+        {
+            var roles = discordUser.Roles.ToList();
+
+            roles.Remove(role);
+
+            await discordUser.ModifyAsync(x =>
+            {
+                x.Roles = roles;
+            });            
+
+            db.Users.Remove(user);
+            await db.SaveChangesAsync();
+
+            Console.WriteLine($"User {discordUser.Nickname} is no longer valid");
+        }
+
+        private async Task RemoveUser(IGuildUser user, IRole role)
+        {
+            var roles = user.Roles.ToList();
+
+            roles.Remove(role);
+
+            await user.ModifyAsync(x =>
+            {
+                x.Roles = roles;
+            });
+        }
+
 
         private async Task CheckUsers()
         {
-            var users = await this.db.Users.ToListAsync();
             var server = await this.client.GetGuildAsync(this.config.ServerID);
-
             var role = server.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
 
-            foreach (var user in users)
-            {                
-                try
+            foreach (var discordUser in await server.GetUsersAsync())
+            {
+                var db = new VerifyContext();
+
+                var ran = false;
+                var faultCount = 0;
+
+                var user = await db.Users.FirstOrDefaultAsync(x => x.DiscordID == discordUser.Id);
+
+                if (user == null)
                 {
-                    var api = new ApiFacade(user.APIKey);
-                    var account = await api.GetAccountAsync();
-
-                    if (account == null)
-                    {
-                        Console.WriteLine($"Error reverifying this user: {user.DiscordID} - {user.APIKey}");
-                        continue;
-                    }
-
-                    bool stillValid = true;
-
-                    if (!this.config.WorldIDs.Contains(account.WorldId))
-                    {
-                        stillValid = false;
-                    }
-
-                    if (stillValid)
-                    {
-                        continue;
-                    }
-
-                    // Remove perms.
-                    var discordUser = await server.GetUserAsync(user.DiscordID);
-
-                    if (discordUser != null)
-                    {
-                        var roles = discordUser.Roles.ToList();
-
-                        roles.Remove(role);
-
-                        await discordUser.ModifyAsync(x =>
-                        {
-                            x.Roles = roles;
-                        });
-                    }
-
-                    this.db.Users.Remove(user);
-                    await this.db.SaveChangesAsync();             
+                    // What are we going to do with the 250+ manually verified people
+                    // await this.RemoveUser(discordUser, role);
+                    continue;
                 }
-                catch (Exception ex)
+
+                while (ran == false)
                 {
-                    Console.WriteLine($"Error: {ex}");
+                    try
+                    {                        
+                        var api = new ApiFacade(user.APIKey);
+                        var account = await api.GetAccountAsync();
+
+                        if (account == null)
+                        {
+                            Console.WriteLine($"Error reverifying this user: {user.DiscordID} - {user.APIKey}");
+                            continue;
+                        }
+
+                        bool stillValid = true;
+
+                        if (!this.config.WorldIDs.Contains(account.WorldId))
+                        {
+                            stillValid = false;
+                        }
+
+                        if (stillValid)
+                        {
+                            Console.WriteLine($"User {user.DiscordID} is still valid");
+                            ran = true;
+                            continue;
+                        }
+
+                        // Remove perms.
+                        await this.RemoveDatabaseUser(db, discordUser, user, role);                       
+
+                        ran = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        //Console.WriteLine($"Error: {ex}");
+                        faultCount++;
+
+                        if (faultCount > 3)
+                        {
+                            await this.RemoveDatabaseUser(db, discordUser, user, role);
+                            ran = true;
+                        }
+                    }
                 }
             }
+
+            Console.WriteLine("Reverification process complete");
         }
     }
 }

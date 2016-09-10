@@ -8,7 +8,7 @@
   },
 
   "dependencies": {
-    "Discord.Net": "1.0.0-dev-380",
+    "Discord.Net": "1.0.0-beta-00415",
     "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final",
     "Microsoft.EntityFrameworkCore.Sqlite": "1.0.0",
     "Microsoft.NETCore.App": {

@@ -41,11 +41,25 @@ namespace VerifyBot
                         return;
                     }
                     
-                    await verify.Process(message);
-                    await reverify.Process(message);
+                    await verify.Process(message);                    
                 };
 
-                await Task.Delay(-1);
+                while (true)
+                {
+                    var line = Console.ReadLine();
+
+                    if (line.Equals("reverify"))
+                    {
+                        Console.WriteLine("Reverifying...");
+                        await reverify.Process(null);
+                    }
+
+                    if (line.Equals("quit"))
+                    {
+                        this.client.Dispose();
+                        return;
+                    }
+                }
             }
             catch (Exception ex)
             {

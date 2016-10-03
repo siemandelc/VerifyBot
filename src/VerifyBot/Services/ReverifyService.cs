@@ -28,31 +28,31 @@ namespace VerifyBot.Services
         {
             try
             {
-                if (message.Channel is IGuildChannel && message.Author is IGuildUser)
-                {
-                    if ((message.Channel as IGuildChannel).Name != this.config.AdminChannel)
-                    {
-                        return;
-                    }
+                //if (message.Channel is IGuildChannel && message.Author is IGuildUser)
+                //{
+                //    if ((message.Channel as IGuildChannel).Name != this.config.AdminChannel)
+                //    {
+                //        return;
+                //    }
 
-                    var author = message.Author as IGuildUser;
-                    var adminRole = author.Guild.Roles.FirstOrDefault(x => x.Name == this.config.AdminRole);
+                //    var author = message.Author as IGuildUser;
+                //    var adminRole = author.Guild.Roles.FirstOrDefault(x => x.Name == this.config.AdminRole);
 
-                    if (adminRole == null)
-                    {
-                        return;
-                    }
+                //    if (adminRole == null)
+                //    {
+                //        return;
+                //    }
 
-                    if (!author.Roles.Contains(adminRole))
-                    {
-                        return;
-                    }
+                //    if (!author.Roles.Contains(adminRole))
+                //    {
+                //        return;
+                //    }
 
-                    if (!message.Content.ToLower().Contains("!checkusers"))
-                    {
-                        return;
-                    }
-                }
+                //    if (!message.Content.ToLower().Contains("!checkusers"))
+                //    {
+                //        return;
+                //    }
+                //}
 
                 await this.CheckUsers();
             }
@@ -71,7 +71,7 @@ namespace VerifyBot.Services
             await discordUser.ModifyAsync(x =>
             {
                 x.Roles = roles;
-            });            
+            });
 
             db.Users.Remove(user);
             await db.SaveChangesAsync();
@@ -89,6 +89,8 @@ namespace VerifyBot.Services
             {
                 x.Roles = roles;
             });
+
+            Console.WriteLine($"Manually verified user {user.Nickname} is no longer valid");
         }
 
 
@@ -108,15 +110,14 @@ namespace VerifyBot.Services
 
                 if (user == null)
                 {
-                    // What are we going to do with the 250+ manually verified people
-                    // await this.RemoveUser(discordUser, role);
+                    await this.RemoveUser(discordUser, role);
                     continue;
                 }
 
                 while (ran == false)
                 {
                     try
-                    {                        
+                    {
                         var api = new ApiFacade(user.APIKey);
                         var account = await api.GetAccountAsync();
 
@@ -135,13 +136,13 @@ namespace VerifyBot.Services
 
                         if (stillValid)
                         {
-                            Console.WriteLine($"User {user.DiscordID} is still valid");
+                            Console.WriteLine($"User {discordUser.Nickname} is still valid");
                             ran = true;
                             continue;
                         }
 
                         // Remove perms.
-                        await this.RemoveDatabaseUser(db, discordUser, user, role);                       
+                        await this.RemoveDatabaseUser(db, discordUser, user, role);
 
                         ran = true;
                     }

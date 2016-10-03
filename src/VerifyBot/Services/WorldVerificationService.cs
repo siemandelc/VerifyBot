@@ -31,27 +31,6 @@ namespace VerifyBot.Service
         {
             try
             {
-                if (e.Channel is IGuildChannel)
-                {
-                    var userMsg = e as IUserMessage;
-
-                    if ((e.Channel as IGuildChannel).Name != this.config.VerifyChannelName)
-                    {
-                        return;
-                    }
-
-                    if (e.Content.ToLower().Contains("!verify"))
-                    {
-                        var user = e.Author as IGuildUser;
-                        var pm = await user.CreateDMChannelAsync();
-
-                        await pm.SendMessageAsync(VerifyStrings.InitialMessage);
-                    }
-
-                    await userMsg.DeleteAsync();
-                    return;
-                }
-
                 if (e.Channel is IDMChannel)
                 {
                     await this.PerformVerification(e);

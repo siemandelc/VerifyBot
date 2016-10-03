@@ -11,8 +11,8 @@
 namespace VerifyBot {
     using System;
     using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///    A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,14 +23,14 @@ namespace VerifyBot {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class VerifyStrings {
-
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
+        
         internal VerifyStrings() {
         }
-
+        
         /// <summary>
         ///    Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -44,7 +44,7 @@ namespace VerifyBot {
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///    Overrides the current thread's CurrentUICulture property for all
         ///    resource lookups using this strongly typed resource class.
@@ -58,7 +58,7 @@ namespace VerifyBot {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Account is already verified. If you are having issues message a verifier.
         /// </summary>
@@ -67,7 +67,7 @@ namespace VerifyBot {
                 return ResourceManager.GetString("AccountAlreadyVerified", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to API Key account does not match supplied account name..
         /// </summary>
@@ -76,7 +76,7 @@ namespace VerifyBot {
                 return ResourceManager.GetString("AccountNameDoesNotMatch", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Could not find that account in the GW2 API..
         /// </summary>
@@ -85,7 +85,7 @@ namespace VerifyBot {
                 return ResourceManager.GetString("AccountNotInAPI", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Account is not on a valid server..
         /// </summary>
@@ -94,7 +94,7 @@ namespace VerifyBot {
                 return ResourceManager.GetString("AccountNotOnServer", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Verification Process Complete. Welcome!.
         /// </summary>
@@ -103,7 +103,7 @@ namespace VerifyBot {
                 return ResourceManager.GetString("EndMessage", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Error processing your verification request. Please try again..
         /// </summary>
@@ -112,16 +112,20 @@ namespace VerifyBot {
                 return ResourceManager.GetString("ErrorMessage", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///    Looks up a localized string similar to Respond to this bot with the following information: {account-name} {api-key} (Without the { or } characters).
+        ///    Looks up a localized string similar to Welcome to the JQ Discord!
+        ///
+        ///**Instructions on how to verify**
+        ///https://docs.google.com/document/d/14i3S1KxjlZoiJfkBsf2r6HRediVl1TXNZJo7F-xmVgs - English
+        ///https://docs.google.com/document/d/1FO7kg_CIIjoZaUqZXKPJ8LUfpfmftfbQ2lrOIZsNrBI - Chinese.
         /// </summary>
         public static string InitialMessage {
             get {
                 return ResourceManager.GetString("InitialMessage", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Bad API Key.
         /// </summary>
@@ -130,7 +134,7 @@ namespace VerifyBot {
                 return ResourceManager.GetString("InvalidAPIKey", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///    Looks up a localized string similar to Could not parse your response..
         /// </summary>

@@ -40,9 +40,22 @@ namespace VerifyBot
                     {
                         return;
                     }
-                    
+                                        
                     await verify.Process(message);
-                    await reverify.Process(message);
+                };
+
+                client.UserJoined += async (userCandidate) =>
+                {
+                    var user = userCandidate as IGuildUser;
+
+                    if (user == null)
+                    {
+                        return;
+                    }
+
+                    var pm = await user.CreateDMChannelAsync();
+
+                    await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                 };
 
                 await Task.Delay(-1);

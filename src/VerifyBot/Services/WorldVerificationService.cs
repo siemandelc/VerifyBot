@@ -9,7 +9,7 @@ using VerifyBot.Models;
 
 namespace VerifyBot.Service
 {
-    public class WorldVerificationService
+    public class WorldVerificationService : IDisposable
     {
         private const string AccountNameApiKeyRegex = @"\s*(.+?\.\d+)\s+(.*?-.*?-.*?-.*?-.*)\s*$";
         private const int APIKeyLength = 72;
@@ -18,7 +18,7 @@ namespace VerifyBot.Service
 
         private readonly VerifyContext db;
 
-        private Configuration config;
+        private readonly Configuration config;
 
         public WorldVerificationService(IDiscordClient client, Configuration config)
         {
@@ -30,11 +30,8 @@ namespace VerifyBot.Service
         public async Task Process(IMessage e)
         {
             try
-            {
-                if (e.Channel is IDMChannel)
-                {
-                    await this.PerformVerification(e);
-                }
+            {                
+                await this.PerformVerification(e);                
             }
             catch (Exception ex)
             {
@@ -68,7 +65,7 @@ namespace VerifyBot.Service
                 // Check GW2 server
                 var api = new ApiFacade(tokens[2]);
                 var account = await api.GetAccountAsync();
-                //var characters = await api.GetCharactersAsync
+               
 
                 if (account == null)
                 {
@@ -91,8 +88,26 @@ namespace VerifyBot.Service
                     return;
                 }
 
-                
-               
+                var characters = await api.GetCharactersAsync();
+
+                bool isWvWLevel = false;
+                foreach (var character in characters)
+                {
+                    var characterObj = await api.GetCharacterAsync(character);
+
+                    if (characterObj.Level >= 60)
+                    {
+                        isWvWLevel = true;
+                        break;
+                    }
+                }
+
+                if (!isWvWLevel)
+                {
+                    await e.Channel.SendMessageAsync(VerifyStrings.NotValidLevel);
+                    Console.WriteLine($"Could not verify {e.Author.Username} - Not on Server.");
+                    return;
+                }
 
                 var existingUser = this.db.Users.FirstOrDefault(x => x.AccountID == account.Id);
 
@@ -137,5 +152,27 @@ namespace VerifyBot.Service
                 Console.WriteLine($"Error: {ex.ToString()}");
             }
         }
+        
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.db.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+    
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {            
+            Dispose(true);         
+        }        
     }
 }

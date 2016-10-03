@@ -8,10 +8,13 @@
   },
 
   "dependencies": {
-    "Discord.Net": "1.0.0-beta-00415",
+    "Discord.Net": "1.0.0-beta-00420",
     "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final",
     "Microsoft.EntityFrameworkCore.Sqlite": "1.0.1",
-    "Microsoft.NETCore.App": "1.0.1",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.1"
+    },
     "System.Resources.ResourceManager": "4.0.1",
     "System.Runtime.Serialization.Json": "4.0.2",
     "System.Threading.Timer": "4.0.1"

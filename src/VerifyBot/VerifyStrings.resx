@@ -145,7 +145,19 @@ https://docs.google.com/document/d/1FO7kg_CIIjoZaUqZXKPJ8LUfpfmftfbQ2lrOIZsNrBI 
   <data name="InvalidAPIKey" xml:space="preserve">
     <value>Bad API Key</value>
   </data>
+  <data name="NotValidLevel" xml:space="preserve">
+    <value>This account does not have a WvW-eligible character. (Level 60+)</value>
+  </data>
   <data name="ParseError" xml:space="preserve">
     <value>Could not parse your response.</value>
+  </data>
+  <data name="VerificationReminder" xml:space="preserve">
+    <value>Hello, friend!
+
+It appears that you are not verified yet. Below are some instructions on how to get started with our verification process. If you have any questions, feel free to ask in the discord-help channel.
+
+**Instructions on how to verify**
+https://docs.google.com/document/d/14i3S1KxjlZoiJfkBsf2r6HRediVl1TXNZJo7F-xmVgs - English
+https://docs.google.com/document/d/1FO7kg_CIIjoZaUqZXKPJ8LUfpfmftfbQ2lrOIZsNrBI - Chinese</value>
   </data>
 </root>

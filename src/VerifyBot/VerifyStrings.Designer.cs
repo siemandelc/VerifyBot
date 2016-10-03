@@ -136,11 +136,35 @@ namespace VerifyBot {
         }
         
         /// <summary>
+        ///    Looks up a localized string similar to This account does not have a WvW-eligible character. (Level 60+).
+        /// </summary>
+        public static string NotValidLevel {
+            get {
+                return ResourceManager.GetString("NotValidLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///    Looks up a localized string similar to Could not parse your response..
         /// </summary>
         public static string ParseError {
             get {
                 return ResourceManager.GetString("ParseError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Hello, friend!
+        ///
+        ///It appears that you are not verified yet. Below are some instructions on how to get started with our verification process. If you have any questions, feel free to ask in the discord-help channel.
+        ///
+        ///**Instructions on how to verify**
+        ///https://docs.google.com/document/d/14i3S1KxjlZoiJfkBsf2r6HRediVl1TXNZJo7F-xmVgs - English
+        ///https://docs.google.com/document/d/1FO7kg_CIIjoZaUqZXKPJ8LUfpfmftfbQ2lrOIZsNrBI - Chinese.
+        /// </summary>
+        public static string VerificationReminder {
+            get {
+                return ResourceManager.GetString("VerificationReminder", resourceCulture);
             }
         }
     }

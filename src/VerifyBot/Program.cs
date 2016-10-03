@@ -10,8 +10,9 @@ namespace VerifyBot
 {
     public class Program
     {
-        private readonly int interval = 86400000;
-        private readonly Timer timer;
+        private const int dayInterval = 86400000;
+        private Timer reverifyTimer;
+        private Timer reminderTimer;
         private DiscordSocketClient client;
         private ConfigurationService configService;
 
@@ -24,13 +25,14 @@ namespace VerifyBot
                 this.configService = new ConfigurationService();
                 this.client = new DiscordSocketClient();
 
-                var config = this.configService.GetConfiguration();
-
-                var verify = new WorldVerificationService(this.client, config);
-                var reverify = new ReverifyService(this.client, config);
+                var config = this.configService.GetConfiguration();                
 
                 await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));
                 await client.ConnectAsync();
+
+                var verify = new WorldVerificationService(this.client, config);
+                var reverify = new ReverifyService(this.client, config);
+                var reminder = new RemindVerifyService(this.client, config);
 
                 var me = await this.client.GetCurrentUserAsync();
 
@@ -41,7 +43,10 @@ namespace VerifyBot
                         return;
                     }
 
-                    await verify.Process(message);
+                    if (message.Channel is IDMChannel)
+                    {
+                        await verify.Process(message);
+                    }
                 };
 
                 client.UserJoined += async (userCandidate) =>
@@ -58,6 +63,9 @@ namespace VerifyBot
                     await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                 };
 
+                this.reverifyTimer = new Timer(this.RunVerification, reverify, dayInterval, dayInterval);
+                this.reminderTimer = new Timer(this.RemindVerify, reminder, dayInterval, dayInterval * 2);
+
                 while (true)
                 {
                     var line = Console.ReadLine();
@@ -65,7 +73,7 @@ namespace VerifyBot
                     if (line.Equals("reverify"))
                     {
                         Console.WriteLine("Reverifying...");
-                        await reverify.Process(null);
+                        await reverify.Process();
                     }
 
                     if (line.Equals("quit"))
@@ -79,6 +87,18 @@ namespace VerifyBot
             {
                 Console.WriteLine($"Aplication crashing. Reason: {ex}");
             }
+        }
+
+        private async void RemindVerify(object service)
+        {
+            var remind = service as RemindVerifyService;
+
+            if (remind == null)
+            {
+                return;
+            }
+
+            await remind.Process();
         }
 
         private static void Main(string[] args) => new Program().Run().GetAwaiter().GetResult();
@@ -98,7 +118,12 @@ namespace VerifyBot
         {
             var verify = service as ReverifyService;
 
-            await verify.Process(null);
+            if (verify == null)
+            {
+                return;
+            }
+
+            await verify.Process();
         }
     }
 }

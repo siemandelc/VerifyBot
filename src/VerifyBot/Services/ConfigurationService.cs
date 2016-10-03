@@ -61,11 +61,8 @@ namespace VerifyBot.Services
             return new Configuration()
             {
                 ServerID = serverID,
-                WorldIDs = worldIDs,
-                VerifyChannelName = verifyChannel,
-                VerifyRole = verifyRole,
-                AdminChannel = adminChannel,
-                AdminRole = adminRole
+                WorldIDs = worldIDs,                
+                VerifyRole = verifyRole
             };
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using VerifyBot.Service;
 using VerifyBot.Services;
@@ -9,11 +10,10 @@ namespace VerifyBot
 {
     public class Program
     {
-        private ConfigurationService configService;
-
+        private readonly int interval = 86400000;
+        private readonly Timer timer;
         private DiscordSocketClient client;
-
-        private static void Main(string[] args) => new Program().Run().GetAwaiter().GetResult();
+        private ConfigurationService configService;
 
         public async Task Run()
         {
@@ -29,7 +29,7 @@ namespace VerifyBot
                 var verify = new WorldVerificationService(this.client, config);
                 var reverify = new ReverifyService(this.client, config);
 
-                await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));                
+                await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));
                 await client.ConnectAsync();
 
                 var me = await this.client.GetCurrentUserAsync();
@@ -40,7 +40,7 @@ namespace VerifyBot
                     {
                         return;
                     }
-                                        
+
                     await verify.Process(message);
                 };
 
@@ -58,6 +58,8 @@ namespace VerifyBot
                     await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                 };
 
+                this.timer = new Timer(this.RunVerification, reverify, interval, interval);
+
                 await Task.Delay(-1);
             }
             catch (Exception ex)
@@ -65,6 +67,8 @@ namespace VerifyBot
                 Console.WriteLine($"Aplication crashing. Reason: {ex}");
             }
         }
+
+        private static void Main(string[] args) => new Program().Run().GetAwaiter().GetResult();
 
         private void CheckIfDatabaseExists()
         {
@@ -75,6 +79,13 @@ namespace VerifyBot
                 Console.WriteLine("Database does not exist. Run the following command: dotnet ef database update");
                 throw new Exception("No Database");
             }
+        }
+
+        private async void RunVerification(object service)
+        {
+            var verify = service as ReverifyService;
+
+            await verify.Process(null);
         }
     }
 }

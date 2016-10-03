@@ -39,6 +39,13 @@ namespace VerifyBot.Gw2Api
             return await this.CallApi<string[]>(url);
         }
 
+        //public async Task<Character> GetCharacterAsync(string characterName)
+        //{
+        //    var name = characterName.Replace(" ", "%20");
+        //    var url = string.Format("{0}v2/characters/{1}?access_token={2}", baseUrl, name, this.Key);
+        //    return await this.CallApi<Character>(url);
+        //}
+
         #endregion API Call - Characters
 
         #region API Call - Worlds

@@ -28,32 +28,6 @@ namespace VerifyBot.Services
         {
             try
             {
-                if (message.Channel is IGuildChannel && message.Author is IGuildUser)
-                {
-                    if ((message.Channel as IGuildChannel).Name != this.config.AdminChannel)
-                    {
-                        return;
-                    }
-
-                    var author = message.Author as IGuildUser;
-                    var adminRole = author.Guild.Roles.FirstOrDefault(x => x.Name == this.config.AdminRole);
-
-                    if (adminRole == null)
-                    {
-                        return;
-                    }
-
-                    if (!author.Roles.Contains(adminRole))
-                    {
-                        return;
-                    }
-
-                    if (!message.Content.ToLower().Contains("!checkusers"))
-                    {
-                        return;
-                    }
-                }
-
                 await this.CheckUsers();
             }
             catch (Exception ex)
@@ -147,7 +121,7 @@ namespace VerifyBot.Services
                     }
                     catch (Exception ex)
                     {
-                        //Console.WriteLine($"Error: {ex}");
+                        Console.WriteLine($"Error: {ex}");
                         faultCount++;
 
                         if (faultCount > 3)

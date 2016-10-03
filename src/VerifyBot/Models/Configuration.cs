@@ -11,12 +11,6 @@ namespace VerifyBot.Models
 
         public List<int> WorldIDs { get; set; }
 
-        public string VerifyChannelName { get; set; }
-
         public string VerifyRole { get; set; }
-
-        public string AdminChannel { get; set; }
-
-        public string AdminRole { get; set; }
     }
 }

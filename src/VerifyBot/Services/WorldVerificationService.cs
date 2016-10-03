@@ -68,6 +68,7 @@ namespace VerifyBot.Service
                 // Check GW2 server
                 var api = new ApiFacade(tokens[2]);
                 var account = await api.GetAccountAsync();
+                //var characters = await api.GetCharactersAsync
 
                 if (account == null)
                 {
@@ -89,6 +90,9 @@ namespace VerifyBot.Service
                     Console.WriteLine($"Could not verify {e.Author.Username} - Not on Server.");
                     return;
                 }
+
+                
+               
 
                 var existingUser = this.db.Users.FirstOrDefault(x => x.AccountID == account.Id);
 

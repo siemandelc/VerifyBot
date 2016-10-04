@@ -90,23 +90,26 @@ namespace VerifyBot.Service
 
                 var characters = await api.GetCharactersAsync();
 
-                bool isWvWLevel = false;
-                foreach (var character in characters)
+                if (account.Access == "PlayForFree")
                 {
-                    var characterObj = await api.GetCharacterAsync(character);
-
-                    if (characterObj.Level >= 60)
+                    bool isWvWLevel = false;
+                    foreach (var character in characters)
                     {
-                        isWvWLevel = true;
-                        break;
-                    }
-                }
+                        var characterObj = await api.GetCharacterAsync(character);
 
-                if (!isWvWLevel)
-                {
-                    await e.Channel.SendMessageAsync(VerifyStrings.NotValidLevel);
-                    Console.WriteLine($"Could not verify {e.Author.Username} - Not on Server.");
-                    return;
+                        if (characterObj.Level >= 60)
+                        {
+                            isWvWLevel = true;
+                            break;
+                        }
+                    }
+
+                    if (!isWvWLevel)
+                    {
+                        await e.Channel.SendMessageAsync(VerifyStrings.NotValidLevel);
+                        Console.WriteLine($"Could not verify {e.Author.Username} - Not on Server.");
+                        return;
+                    }
                 }
 
                 var existingUser = this.db.Users.FirstOrDefault(x => x.AccountID == account.Id);

@@ -107,7 +107,7 @@ namespace VerifyBot.Service
                     if (!isWvWLevel)
                     {
                         await e.Channel.SendMessageAsync(VerifyStrings.NotValidLevel);
-                        Console.WriteLine($"Could not verify {e.Author.Username} - Not on Server.");
+                        Console.WriteLine($"Could not verify {e.Author.Username} - Not elgible for WvW.");
                         return;
                     }
                 }

@@ -36,14 +36,7 @@ namespace VerifyBot.Services
 
         private async Task RemoveDatabaseUser(VerifyContext db, IGuildUser discordUser, User user, IRole role)
         {
-            var roles = discordUser.Roles.ToList();
-
-            roles.Remove(role);
-
-            await discordUser.ModifyAsync(x =>
-            {
-                x.Roles = roles;
-            });
+            await discordUser.RemoveRolesAsync(discordUser.Roles);
 
             db.Users.Remove(user);
             await db.SaveChangesAsync();
@@ -67,6 +60,12 @@ namespace VerifyBot.Services
 
             foreach (var discordUser in discordUsers)
             {
+                if (!discordUser.Roles.Contains(role))
+                {
+                    Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is not verified, skipping");
+                    continue;
+                }
+
                 using (var db = new VerifyContext())
                 {
                     var ran = false;
@@ -76,6 +75,7 @@ namespace VerifyBot.Services
 
                     if (user == null)
                     {
+                        Console.WriteLine($"Removing manually verified user {discordUser.Nickname ?? discordUser.Username}");
                         await this.RemoveUser(discordUser);
                         continue;
                     }
@@ -119,7 +119,7 @@ namespace VerifyBot.Services
 
                             if (faultCount > 3)
                             {
-                                Console.WriteLine($"Error removing user {discordUser.Nickname} ({discordUser.Id})");
+                                Console.WriteLine($"Error removing user {discordUser.Nickname ?? discordUser.Username} ({discordUser.Id})");
                                 //await this.RemoveDatabaseUser(db, discordUser, user, role);
                                 ran = true;
                             }

@@ -38,29 +38,51 @@ namespace VerifyBot
 
                 client.MessageReceived += async (message) =>
                 {
-                    if (message.Author.IsBot)
+                    try
                     {
-                        return;
-                    }
+                        if (message.Author.IsBot)
+                        {
+                            return;
+                        }
 
-                    if (message.Channel is IDMChannel)
+                        if (message.Channel is IDMChannel)
+                        {
+                            await verify.Process(message);
+                        }
+
+                        if (message.Channel is IGuildChannel && message.Content.Contains("!verify"))
+                        {
+                            if (message.Author is IGuildUser)
+                            {
+                                await reminder.SendInstructions(message.Author as IGuildUser);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        await verify.Process(message);
+                        Console.WriteLine($"Error occured while processing message: {ex.Message}");
                     }
                 };
 
                 client.UserJoined += async (userCandidate) =>
                 {
-                    var user = userCandidate as IGuildUser;
-
-                    if (user == null)
+                    try
                     {
-                        return;
+                        var user = userCandidate as IGuildUser;
+
+                        if (user == null)
+                        {
+                            return;
+                        }
+
+                        var pm = await user.CreateDMChannelAsync();
+
+                        await pm.SendMessageAsync(VerifyStrings.InitialMessage);
                     }
-
-                    var pm = await user.CreateDMChannelAsync();
-
-                    await pm.SendMessageAsync(VerifyStrings.InitialMessage);
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error occured when sending initial message: {ex.Message}");
+                    }
                 };
 
                 this.reverifyTimer = new Timer(this.RunVerification, reverify, dayInterval, dayInterval);

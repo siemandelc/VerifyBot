@@ -47,5 +47,23 @@ namespace VerifyBot.Services
                 Console.WriteLine($"reminded {discordUser.Nickname} ({discordUser.Id})");
             }
         }
+
+        public async Task SendInstructions(IGuildUser user)
+        {
+            var server = await this.client.GetGuildAsync(this.config.ServerID);
+            var role = server.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
+
+            var channel = await user.CreateDMChannelAsync();
+
+            if (user.Roles.Contains(role))
+            {
+                await channel.SendMessageAsync(VerifyStrings.AccountAlreadyVerified);
+            }
+            else
+            {
+                await channel.SendMessageAsync(VerifyStrings.VerificationReminder);
+                Console.WriteLine($"Instructed {user.Nickname} ({user.Id})");
+            }                      
+        }
     }
 }

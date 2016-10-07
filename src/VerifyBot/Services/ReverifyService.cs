@@ -51,16 +51,9 @@ namespace VerifyBot.Services
             Console.WriteLine($"User {discordUser.Nickname} is no longer valid");
         }
 
-        private async Task RemoveUser(IGuildUser user, IRole role)
+        private async Task RemoveUser(IGuildUser user)
         {
-            var roles = user.Roles.ToList();
-
-            roles.Remove(role);
-
-            await user.ModifyAsync(x =>
-            {
-                x.Roles = roles;
-            });
+            await user.RemoveRolesAsync(user.Roles);
 
             Console.WriteLine($"Manually verified user {user.Nickname} is no longer valid");
         }
@@ -83,7 +76,7 @@ namespace VerifyBot.Services
 
                     if (user == null)
                     {
-                        await this.RemoveUser(discordUser, role);
+                        await this.RemoveUser(discordUser);
                         continue;
                     }
 

@@ -60,6 +60,11 @@ namespace VerifyBot.Services
 
             foreach (var discordUser in discordUsers)
             {
+                if (discordUser.IsBot)
+                {
+                    continue;
+                }
+
                 if (!discordUser.Roles.Contains(role))
                 {
                     Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is not verified, skipping");

@@ -7,7 +7,7 @@ using VerifyBot.Models;
 
 namespace VerifyBot.Migrations
 {
-    [DbContext(typeof(VerifyContext))]
+    [DbContext(typeof(VerifyDatabase))]
     [Migration("20160801152723_initial")]
     partial class initial
     {

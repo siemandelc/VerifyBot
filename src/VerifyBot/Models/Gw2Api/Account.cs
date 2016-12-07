@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace VerifyBot.Models.Gw2Api
+namespace VerifyBot.Gw2Api
 {
     [DataContract]
     public class Account

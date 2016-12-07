@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
-using VerifyBot.Models.Gw2Api;
 
 namespace VerifyBot.Gw2Api
 {

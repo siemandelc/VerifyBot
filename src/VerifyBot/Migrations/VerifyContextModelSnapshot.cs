@@ -7,7 +7,7 @@ using VerifyBot.Models;
 
 namespace VerifyBot.Migrations
 {
-    [DbContext(typeof(VerifyContext))]
+    [DbContext(typeof(VerifyDatabase))]
     partial class VerifyContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

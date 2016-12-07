@@ -1,29 +1,24 @@
 ﻿using Discord;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VerifyBot.Models;
 
 namespace VerifyBot.Services
 {
     public class RemindVerifyService
     {
-        private readonly IDiscordClient client;
+        private readonly Manager manager;
 
-        private readonly Configuration config;
-
-        public RemindVerifyService(IDiscordClient client, Configuration config)
+        public RemindVerifyService(Manager manager)
         {
-            this.client = client;
-            this.config = config;
+            this.manager = manager;
         }
 
         public async Task Process()
         {
             try
             {
-                await this.RemindUsers();
+                await RemindUsers();
             }
             catch (Exception ex)
             {
@@ -33,29 +28,25 @@ namespace VerifyBot.Services
 
         private async Task RemindUsers()
         {
-            var server = await this.client.GetGuildAsync(this.config.ServerID);
-            var role = server.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
+            var verifyRoleId = manager.VerifyRoleId;
 
-            var discordUsers = await server.GetUsersAsync();
+            var allUsers = await manager.getDiscordUsers();
+            var unverifiedUsers = allUsers.Where(u => !manager.isUserVerified(u));
 
-            discordUsers = discordUsers.Where(x => !x.Roles.Contains(role)).ToList();
-
-            foreach (var discordUser in discordUsers)
+            foreach (var user in unverifiedUsers)
             {
-                var channel = await discordUser.CreateDMChannelAsync();
+                var channel = await user.CreateDMChannelAsync();
                 await channel.SendMessageAsync(VerifyStrings.VerificationReminder);
-                Console.WriteLine($"reminded {discordUser.Nickname} ({discordUser.Id})");
+                Console.WriteLine($"reminded {user.Nickname} ({user.Id})");
+                await channel.CloseAsync();
             }
         }
 
         public async Task SendInstructions(IGuildUser user)
         {
-            var server = await this.client.GetGuildAsync(this.config.ServerID);
-            var role = server.Roles.Where(x => x.Name == this.config.VerifyRole)?.FirstOrDefault();
-
             var channel = await user.CreateDMChannelAsync();
 
-            if (user.Roles.Contains(role))
+            if (manager.isUserVerified(user))
             {
                 await channel.SendMessageAsync(VerifyStrings.AccountAlreadyVerified);
             }
@@ -63,7 +54,9 @@ namespace VerifyBot.Services
             {
                 await channel.SendMessageAsync(VerifyStrings.VerificationReminder);
                 Console.WriteLine($"Instructed {user.Nickname} ({user.Id})");
-            }                      
+            }
+
+            await channel.CloseAsync();
         }
     }
 }

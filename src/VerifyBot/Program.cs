@@ -3,7 +3,6 @@ using Discord.WebSocket;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using VerifyBot.Service;
 using VerifyBot.Services;
 
 namespace VerifyBot
@@ -15,6 +14,7 @@ namespace VerifyBot
         private Timer reminderTimer;
         private DiscordSocketClient client;
         private ConfigurationService configService;
+        private Manager manager;
 
         public async Task Run()
         {
@@ -22,19 +22,20 @@ namespace VerifyBot
             {
                 this.CheckIfDatabaseExists();
 
-                this.configService = new ConfigurationService();
                 this.client = new DiscordSocketClient();
-
-                var config = this.configService.GetConfiguration();                
-
                 await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));
                 await client.ConnectAsync();
 
-                var verify = new WorldVerificationService(this.client, config);
-                var reverify = new ReverifyService(this.client, config);
-                var reminder = new RemindVerifyService(this.client, config);
+                this.configService = new ConfigurationService();
+                var config = this.configService.GetConfiguration();
 
-                var me = await this.client.GetCurrentUserAsync();
+                manager = new Manager(client, config);
+
+                var verify = new WorldVerificationService(manager);
+                var reverify = new ReverifyService(manager);
+                var reminder = new RemindVerifyService(manager);
+
+                var me = this.client.CurrentUser;
 
                 client.MessageReceived += async (message) =>
                 {

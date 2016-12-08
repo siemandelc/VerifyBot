@@ -30,8 +30,8 @@ namespace VerifyBot.Services
         {
             var verifyRoleId = manager.VerifyRoleId;
 
-            var allUsers = await manager.getDiscordUsers();
-            var unverifiedUsers = allUsers.Where(u => !manager.isUserVerified(u));
+            var allUsers = await manager.GetDiscordUsers();
+            var unverifiedUsers = allUsers.Where(u => !manager.IsUserVerified(u));
 
             foreach (var user in unverifiedUsers)
             {
@@ -46,7 +46,7 @@ namespace VerifyBot.Services
         {
             var channel = await user.CreateDMChannelAsync();
 
-            if (manager.isUserVerified(user))
+            if (manager.IsUserVerified(user))
             {
                 await channel.SendMessageAsync(VerifyStrings.AccountAlreadyVerified);
             }

@@ -11,7 +11,7 @@ namespace VerifyBot.Services
         private static readonly Regex AccountNameApiKeyRegex = new Regex(@"\s*(.+?\.\d+)\s+(.*?-.*?-.*?-.*?-.*)\s*$");
         private const int APIKeyLength = 72;
 
-        private Manager manager { get; set; }
+        private Manager Manager { get; set; }
         public string AccoutName { get; private set; }
         public string APIKey { get; private set; }
         public IUser Requestor { get; private set; }
@@ -20,12 +20,12 @@ namespace VerifyBot.Services
         private ApiFacade API { get; set; }
 
         public Account Account { get; private set; }
-        private bool isValidAccount { get { return Account != null; } }
-        private bool hasValidCharacter { get; set; }
+        private bool IsValidAccount { get { return Account != null; } }
+        private bool HasValidCharacter { get; set; }
 
-        public bool isValid
+        public bool IsValid
         {
-            get { return isValidAccount && hasValidCharacter; }
+            get { return IsValidAccount && HasValidCharacter; }
         }
 
         public Verifier(string accountName, string apiKey, Manager manager, IUser requestor, IMessageChannel channel)
@@ -34,25 +34,25 @@ namespace VerifyBot.Services
             APIKey = apiKey;
             Requestor = requestor;
             Channel = channel;
-            this.manager = manager;
+            Manager = manager;
 
             API = new ApiFacade(APIKey);
 
-            hasValidCharacter = false;
+            HasValidCharacter = false;
         }
 
-        public async Task<IUserMessage> sendMessageAsync(string message)
+        public async Task<IUserMessage> SendMessageAsync(string message)
         {
             if (Channel == null)
                 return null; // Task.FromResult<object>(null);
             return await Channel.SendMessageAsync(message);
         }
 
-        public static Verifier create(string accountName, string apiKey, Manager manager, IUser requestor, IMessageChannel channel = null)
+        public static Verifier Create(string accountName, string apiKey, Manager manager, IUser requestor, IMessageChannel channel = null)
         {
             return new Verifier(accountName, apiKey, manager, requestor, channel);
         }
-        public async static Task<Verifier> createFromRequestMessage(IMessage requestMessage, Manager manager)
+        public async static Task<Verifier> CreateFromRequestMessage(IMessage requestMessage, Manager manager)
         {
             var tokens = AccountNameApiKeyRegex.Split(requestMessage.Content);
 
@@ -73,27 +73,27 @@ namespace VerifyBot.Services
             return new Verifier(tokens[1], tokens[2], manager, requestMessage.Author, requestMessage.Channel);
         }
 
-        private async Task validateAccount()
+        private async Task ValidateAccount()
         {
             var account = await API.GetAccountAsync();
 
             if (account == null)
             {
-                await sendMessageAsync(VerifyStrings.AccountNotInAPI);
+                await SendMessageAsync(VerifyStrings.AccountNotInAPI);
                 Console.WriteLine($"Could not verify {Requestor.Username} - Cannont access account in GW2 API.");
                 return;
             }
 
             if (account.Name.ToLower() != AccoutName.ToLower())
             {
-                await sendMessageAsync(VerifyStrings.AccountNameDoesNotMatch);
+                await SendMessageAsync(VerifyStrings.AccountNameDoesNotMatch);
                 Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account. (Case matters)");
                 return;
             }
 
-            if (!manager.isAccountOnOurWorld(account))
+            if (!Manager.IsAccountOnOurWorld(account))
             {
-                await sendMessageAsync(VerifyStrings.AccountNotOnServer);
+                await SendMessageAsync(VerifyStrings.AccountNotOnServer);
                 Console.WriteLine($"Could not verify {Requestor.Username} - Not on Server.");
                 return;
             }
@@ -101,7 +101,7 @@ namespace VerifyBot.Services
             Account = account;
         }
 
-        private async Task validateCharacters()
+        private async Task ValidateCharacters()
         {
             var characters = await API.GetCharactersAsync();
 
@@ -121,20 +121,20 @@ namespace VerifyBot.Services
 
                 if (!isWvWLevel)
                 {
-                    await sendMessageAsync(VerifyStrings.NotValidLevel);
+                    await SendMessageAsync(VerifyStrings.NotValidLevel);
                     Console.WriteLine($"Could not verify {Requestor.Username} - Not elgible for WvW.");
                     return;
                 }
             }
 
-            hasValidCharacter = true;
+            HasValidCharacter = true;
         }
 
-        public async Task validate()
+        public async Task Validate()
         {
-            await validateAccount();
-            if (isValidAccount)
-                await validateCharacters();
+            await ValidateAccount();
+            if (IsValidAccount)
+                await ValidateCharacters();
         }
 
     }

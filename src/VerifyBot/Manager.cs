@@ -27,10 +27,10 @@ namespace VerifyBot
             DiscordClient = client;
             Config = config;
 
-            initialize();
+            Initialize();
         }
 
-        private async void initialize()
+        private async void Initialize()
         {
             Discord = await DiscordClient.GetGuildAsync(Config.ServerID);
 
@@ -44,36 +44,36 @@ namespace VerifyBot
             }
         }
 
-        public async Task<IReadOnlyCollection<IGuildUser>> getDiscordUsers()
+        public async Task<IReadOnlyCollection<IGuildUser>> GetDiscordUsers()
         {
             return await Discord.GetUsersAsync();
         }
-        public async Task<IGuildUser> getDiscordUser(ulong id)
+        public async Task<IGuildUser> GetDiscordUser(ulong id)
         {
             return await Discord.GetUserAsync(id);
         }
 
-        public bool isUserVerified(IGuildUser user)
+        public bool IsUserVerified(IGuildUser user)
         {
             return user.RoleIds.Contains(VerifyRoleId);
         }
 
-        public bool isAccountOnOurWorld(Account account)
+        public bool IsAccountOnOurWorld(Account account)
         {
             return Config.WorldIDs.Contains(account.WorldId);
         }
 
-        public async Task verifyUser(ulong discordId, string accountId, string apiKey)
+        public async Task VerifyUser(ulong discordId, string accountId, string apiKey)
         {
-            var user = await getDiscordUser(discordId);
+            var user = await GetDiscordUser(discordId);
 
-            if (!isUserVerified(user))
+            if (!IsUserVerified(user))
                 await user.AddRolesAsync(VerifyRole);
 
-            await DB.addOrUpdateUser(accountId, apiKey, discordId);
+            await DB.AddOrUpdateUser(accountId, apiKey, discordId);
         }
 
-        public async Task unverifyUser(IGuildUser discordUser, User dbUser = null)
+        public async Task UnverifyUser(IGuildUser discordUser, User dbUser = null)
         {
             var userRoles = new IRole[discordUser.RoleIds.Count];
             var i = 0;
@@ -82,7 +82,7 @@ namespace VerifyBot
             await discordUser.RemoveRolesAsync(userRoles);
 
             if (dbUser == null)
-                dbUser = await getDatabaseUser(discordUser.Id);
+                dbUser = await GetDatabaseUser(discordUser.Id);
 
             if (dbUser != null)
             {
@@ -96,7 +96,7 @@ namespace VerifyBot
             }
         }
 
-        public async Task<User> getDatabaseUser(ulong discordId)
+        public async Task<User> GetDatabaseUser(ulong discordId)
         {
             return await DB.Users.FirstOrDefaultAsync(x => x.DiscordID == discordId);
         }

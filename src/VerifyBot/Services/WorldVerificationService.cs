@@ -20,13 +20,13 @@ namespace VerifyBot.Services
                 Console.WriteLine($"Begin verification for {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 
-                var request = await Verifier.createFromRequestMessage(e, manager);
-                await request.validate();
+                var request = await Verifier.CreateFromRequestMessage(e, manager);
+                await request.Validate();
 
-                if (!request.isValid)
+                if (!request.IsValid)
                     return;
 
-                await manager.verifyUser(request.Requestor.Id, request.Account.Id, request.APIKey);
+                await manager.VerifyUser(request.Requestor.Id, request.Account.Id, request.APIKey);
 
                 await e.Channel.SendMessageAsync(VerifyStrings.EndMessage);
                 Console.WriteLine($"{e.Author.Username} Verified.");

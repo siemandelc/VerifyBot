@@ -13,7 +13,7 @@ namespace VerifyBot.Models
             optionsBuilder.UseSqlite("Filename=Users.db");
         }
 
-        public async Task addOrUpdateUser(string accountId, string apiKey, ulong discordId)
+        public async Task AddOrUpdateUser(string accountId, string apiKey, ulong discordId)
         {
             var existingUser = Users.FirstOrDefault(x => x.AccountID == accountId);
 

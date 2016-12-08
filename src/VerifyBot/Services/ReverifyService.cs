@@ -29,15 +29,15 @@ namespace VerifyBot.Services
         {
             Console.WriteLine("Reverification process beginning");
 
-            var discordUsers = await manager.getDiscordUsers();
-            var verifiedNonBotUsers = discordUsers.Where(u => !(u.IsBot || !manager.isUserVerified(u)));
+            var discordUsers = await manager.GetDiscordUsers();
+            var verifiedNonBotUsers = discordUsers.Where(u => !(u.IsBot || !manager.IsUserVerified(u)));
 
             foreach (var discordUser in verifiedNonBotUsers)
             {
-                var dbUser = await manager.getDatabaseUser(discordUser.Id);
+                var dbUser = await manager.GetDatabaseUser(discordUser.Id);
                 if (dbUser == null)
                 { 
-                    await manager.unverifyUser(discordUser, dbUser);
+                    await manager.UnverifyUser(discordUser, dbUser);
                     continue;
                 }
 
@@ -46,13 +46,13 @@ namespace VerifyBot.Services
                 {
                     try
                     {
-                        var verifier = Verifier.create(dbUser.AccountID, dbUser.APIKey, manager, discordUser);
-                        await verifier.validate();
+                        var verifier = Verifier.Create(dbUser.AccountID, dbUser.APIKey, manager, discordUser);
+                        await verifier.Validate();
 
-                        if (!verifier.isValid)
+                        if (!verifier.IsValid)
                             Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is still valid");
                         else
-                            await manager.unverifyUser(discordUser, dbUser);
+                            await manager.UnverifyUser(discordUser, dbUser);
 
                         break;
                     }

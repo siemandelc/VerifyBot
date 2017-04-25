@@ -14,26 +14,6 @@ namespace VerifyBot.Gw2Api
         [DataMember(Name = "population")]
         public string Population { get; set; }
 
-        /// <summary>Gets the server location.</summary>
-        /// <remarks>The second digit of the  language: 1 means French, 2 means German, and 3 means Spanish.</remarks>
-        public string ServerLocation
-        {
-            get
-            {
-                var id = this.Id.ToString();
-                if (id.StartsWith("1"))
-                {
-                    return "North America";
-                }
-                else if (id.StartsWith("2"))
-                {
-                    return "Europe";
-                }
-
-                return "Unknown";
-            }
-        }
-
         public string ServerLanguage
         {
             get
@@ -56,6 +36,26 @@ namespace VerifyBot.Gw2Api
                 }
 
                 return "Unspecified";
+            }
+        }
+
+        /// <summary>Gets the server location.</summary>
+        /// <remarks>The second digit of the  language: 1 means French, 2 means German, and 3 means Spanish.</remarks>
+        public string ServerLocation
+        {
+            get
+            {
+                var id = this.Id.ToString();
+                if (id.StartsWith("1"))
+                {
+                    return "North America";
+                }
+                else if (id.StartsWith("2"))
+                {
+                    return "Europe";
+                }
+
+                return "Unknown";
             }
         }
     }

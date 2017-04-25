@@ -1,6 +1,7 @@
 ﻿using Discord;
 using System;
 using System.Threading.Tasks;
+using VerifyBot.Models;
 
 namespace VerifyBot.Services
 {
@@ -8,9 +9,12 @@ namespace VerifyBot.Services
     {
         private readonly Manager manager;
 
-        public WorldVerificationService(Manager manager)
+        private readonly UserStrings strings;
+
+        public WorldVerificationService(Manager manager, UserStrings strings)
         {
             this.manager = manager;
+            this.strings = strings;
         }
 
         public async Task Process(IMessage e)
@@ -20,7 +24,7 @@ namespace VerifyBot.Services
                 Console.WriteLine($"Begin verification for {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 
-                var request = await Verifier.CreateFromRequestMessage(e, manager);
+                var request = await VerifyService.CreateFromRequestMessage(e, manager, this.strings);
                 await request.Validate();
 
                 if (!request.IsValid)
@@ -28,12 +32,12 @@ namespace VerifyBot.Services
 
                 await manager.VerifyUser(request.Requestor.Id, request.Account.Id, request.APIKey);
 
-                await e.Channel.SendMessageAsync(VerifyStrings.EndMessage);
+                await e.Channel.SendMessageAsync(this.strings.EndMessage);
                 Console.WriteLine($"{e.Author.Username} Verified.");
             }
             catch (Exception ex)
             {
-                await e.Channel.SendMessageAsync(VerifyStrings.ErrorMessage);
+                await e.Channel.SendMessageAsync(this.strings.ErrorMessage);
                 Console.WriteLine($"Error: {ex.ToString()}");
             }
         }

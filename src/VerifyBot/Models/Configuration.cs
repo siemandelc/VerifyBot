@@ -4,10 +4,12 @@ namespace VerifyBot.Models
 {
     public class Configuration
     {
-        public ulong ServerID { get; set; }
-
-        public List<int> WorldIDs { get; set; }
+        public ulong ServerId { get; set; }
 
         public string VerifyRole { get; set; }
+
+        public string DiscordToken { get; set; }
+
+        public List<int> WorldIds { get; set; }
     }
 }

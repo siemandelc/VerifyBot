@@ -1,76 +1,65 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Discord;
+using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using Discord;
-using Discord.WebSocket;
-using VerifyBot.Models;
 using VerifyBot.Gw2Api;
+using VerifyBot.Models;
 
 namespace VerifyBot
 {
     public class Manager : IDisposable
     {
-        private IDiscordClient DiscordClient { get; set; }
-        private IGuild Discord { get; set; }
-        private Configuration Config { get; set; }
-
-        private readonly VerifyDatabase DB = new VerifyDatabase();
-
-        public IRole VerifyRole { get; private set; }
-        public ulong VerifyRoleId { get { return VerifyRole.Id; } }
+        private readonly VerifyDatabase db = new VerifyDatabase();
 
         public Manager(DiscordSocketClient client, Configuration config)
         {
-            DiscordClient = client;
-            Config = config;
+            discordClient = client;
+            this.config = config;
 
             Initialize();
         }
 
-        private async void Initialize()
-        {
-            Discord = await DiscordClient.GetGuildAsync(Config.ServerID);
+        public IRole verifyRole { get; private set; }
 
-            // set verify role id
-            VerifyRole = Discord.Roles.Where(x => x.Name == Config.VerifyRole)?.FirstOrDefault();
-            if (VerifyRole == null)
-            {
-                var msg = $"Unable to find server role matching verify role config of '{Config.VerifyRole}'.";
-                Console.WriteLine(msg);
-                throw new InvalidOperationException(msg);
-            }
+        public ulong verifyRoleId { get { return verifyRole.Id; } }
+
+        private Configuration config { get; set; }
+
+        private IGuild discord { get; set; }
+
+        private IDiscordClient discordClient { get; set; }
+
+        public async Task<User> GetDatabaseUser(ulong discordId)
+        {
+            return await db.Users.FirstOrDefaultAsync(x => x.DiscordID == discordId);
+        }
+
+        public async Task<IGuildUser> GetDiscordUser(ulong id)
+        {
+            return await discord.GetUserAsync(id);
         }
 
         public async Task<IReadOnlyCollection<IGuildUser>> GetDiscordUsers()
         {
-            return await Discord.GetUsersAsync();
-        }
-        public async Task<IGuildUser> GetDiscordUser(ulong id)
-        {
-            return await Discord.GetUserAsync(id);
-        }
-
-        public bool IsUserVerified(IGuildUser user)
-        {
-            return user.RoleIds.Contains(VerifyRoleId);
+            return await discord.GetUsersAsync();
         }
 
         public bool IsAccountOnOurWorld(Account account)
         {
-            return Config.WorldIDs.Contains(account.WorldId);
+            return config.WorldIds.Contains(account.WorldId);
         }
 
-        public async Task VerifyUser(ulong discordId, string accountId, string apiKey)
+        public bool IsUserVerified(IGuildUser user)
         {
-            var user = await GetDiscordUser(discordId);
+            if (user.RoleIds.Count == 0)
+            {
+                return false;
+            }
 
-            if (!IsUserVerified(user))
-                await user.AddRolesAsync(VerifyRole);
-
-            await DB.AddOrUpdateUser(accountId, apiKey, discordId);
+            return user.RoleIds.Contains(verifyRoleId);
         }
 
         public async Task UnverifyUser(IGuildUser discordUser, User dbUser = null)
@@ -78,7 +67,7 @@ namespace VerifyBot
             var userRoles = new IRole[discordUser.RoleIds.Count];
             var i = 0;
             foreach (var roleId in discordUser.RoleIds)
-                userRoles[i++] = Discord.GetRole(roleId);
+                userRoles[i++] = discord.GetRole(roleId);
             await discordUser.RemoveRolesAsync(userRoles);
 
             if (dbUser == null)
@@ -86,8 +75,8 @@ namespace VerifyBot
 
             if (dbUser != null)
             {
-                DB.Users.Remove(dbUser);
-                await DB.SaveChangesAsync();
+                db.Users.Remove(dbUser);
+                await db.SaveChangesAsync();
                 Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is no longer valid");
             }
             else
@@ -96,28 +85,50 @@ namespace VerifyBot
             }
         }
 
-        public async Task<User> GetDatabaseUser(ulong discordId)
+        public async Task VerifyUser(ulong discordId, string accountId, string apiKey)
         {
-            return await DB.Users.FirstOrDefaultAsync(x => x.DiscordID == discordId);
+            var user = await GetDiscordUser(discordId);
+
+            if (!IsUserVerified(user))
+                await user.AddRoleAsync(verifyRole);
+
+            await db.AddOrUpdateUser(accountId, apiKey, discordId);
+        }
+
+        private async void Initialize()
+        {
+            discord = await discordClient.GetGuildAsync(config.ServerId);
+
+            // set verify role id
+            verifyRole = discord.Roles.Where(x => x.Name == config.VerifyRole)?.FirstOrDefault();
+
+            if (verifyRole == null)
+            {
+                var msg = $"Unable to find server role matching verify role config of '{config.VerifyRole}'.";
+                Console.WriteLine(msg);
+                throw new InvalidOperationException(msg);
+            }
         }
 
         #region IDisposeable
+
         private bool disposedValue = false; // To detect redundant calls
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
-                    DB.Dispose();
+                    db.Dispose();
                 disposedValue = true;
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-        #endregion
+        #endregion IDisposeable
     }
 }

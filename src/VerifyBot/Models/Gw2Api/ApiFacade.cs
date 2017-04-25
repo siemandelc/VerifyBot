@@ -33,12 +33,6 @@ namespace VerifyBot.Gw2Api
 
         #region API Call - Characters
 
-        public async Task<string[]> GetCharactersAsync()
-        {
-            var url = string.Format("{0}v2/characters?access_token={1}", baseUrl, this.Key);
-            return await this.CallApi<string[]>(url);
-        }
-
         public async Task<Character> GetCharacterAsync(string characterName)
         {
             var name = characterName.Replace(" ", "%20");
@@ -46,21 +40,27 @@ namespace VerifyBot.Gw2Api
             return await this.CallApi<Character>(url);
         }
 
-        #endregion
+        public async Task<string[]> GetCharactersAsync()
+        {
+            var url = string.Format("{0}v2/characters?access_token={1}", baseUrl, this.Key);
+            return await this.CallApi<string[]>(url);
+        }
+
+        #endregion API Call - Characters
 
         #region API Call - Worlds
-
-        public async Task<World[]> GetWorldsAsync()
-        {
-            var url = string.Format("{0}v2/worlds?ids=all", baseUrl);
-            return await this.CallApi<World[]>(url);
-        }
 
         public async Task<World> GetWorldAsync(int worldId)
         {
             var url = string.Format("{0}v2/worlds?ids={1}", baseUrl, worldId);
             var worlds = await this.CallApi<World[]>(url);
             return worlds[0];
+        }
+
+        public async Task<World[]> GetWorldsAsync()
+        {
+            var url = string.Format("{0}v2/worlds?ids=all", baseUrl);
+            return await this.CallApi<World[]>(url);
         }
 
         #endregion API Call - Worlds
@@ -73,20 +73,20 @@ namespace VerifyBot.Gw2Api
             return this.DeserializeJson<T>(json);
         }
 
-        private async Task<string> GetJsonAsync(string url)
-        {
-            HttpClient http = new HttpClient();
-            var response = await http.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
-        }
-
         private T DeserializeJson<T>(string json)
         {
             var serializer = new DataContractJsonSerializer(typeof(T));
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
             var result = (T)serializer.ReadObject(ms);
             return result;
+        }
+
+        private async Task<string> GetJsonAsync(string url)
+        {
+            HttpClient http = new HttpClient();
+            var response = await http.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
         }
 
         #endregion JSON Helpers

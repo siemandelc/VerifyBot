@@ -1,8 +1,11 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using SimpleInjector;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using VerifyBot.Factories;
+using VerifyBot.Models;
 using VerifyBot.Services;
 
 namespace VerifyBot
@@ -10,84 +13,24 @@ namespace VerifyBot
     public class Program
     {
         private const int dayInterval = 86400000;
-        private Timer reverifyTimer;
+        private Container container;
         private Timer reminderTimer;
-        private DiscordSocketClient client;
-        private ConfigurationService configService;
-        private Manager manager;
+        private Timer reverifyTimer;
 
         public async Task Run()
         {
             try
             {
                 this.CheckIfDatabaseExists();
+                this.LoadContainerAsync();
 
-                this.client = new DiscordSocketClient();
-                await client.LoginAsync(TokenType.Bot, Helper.SecretsReader.GetSecret("discord_token"));
-                await client.ConnectAsync();
+                var client = container.GetInstance<DiscordSocketClient>();
 
-                this.configService = new ConfigurationService();
-                var config = this.configService.GetConfiguration();
+                client.MessageReceived += MessageReceived;
+                client.UserJoined += UserJoined;
 
-                manager = new Manager(client, config);
-
-                var verify = new WorldVerificationService(manager);
-                var reverify = new ReverifyService(manager);
-                var reminder = new RemindVerifyService(manager);
-
-                var me = this.client.CurrentUser;
-
-                client.MessageReceived += async (message) =>
-                {
-                    try
-                    {
-                        if (message.Author.IsBot)
-                        {
-                            return;
-                        }
-
-                        if (message.Channel is IDMChannel)
-                        {
-                            await verify.Process(message);
-                        }
-
-                        if (message.Channel is IGuildChannel && message.Content.Contains("!verify"))
-                        {
-                            if (message.Author is IGuildUser)
-                            {
-                                await reminder.SendInstructions(message.Author as IGuildUser);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error occured while processing message: {ex.Message}");
-                    }
-                };
-
-                client.UserJoined += async (userCandidate) =>
-                {
-                    try
-                    {
-                        var user = userCandidate as IGuildUser;
-
-                        if (user == null)
-                        {
-                            return;
-                        }
-
-                        var pm = await user.CreateDMChannelAsync();
-
-                        await pm.SendMessageAsync(VerifyStrings.InitialMessage);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error occured when sending initial message: {ex.Message}");
-                    }
-                };
-
-                this.reverifyTimer = new Timer(this.RunVerification, reverify, dayInterval, dayInterval);
-                this.reminderTimer = new Timer(this.RemindVerify, reminder, dayInterval, dayInterval * 2);
+                this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
+                this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);
 
                 while (true)
                 {
@@ -96,12 +39,11 @@ namespace VerifyBot
                     if (line.Equals("reverify"))
                     {
                         Console.WriteLine("Reverifying...");
-                        await reverify.Process();
+                        await container.GetInstance<ReverifyService>().Process();
                     }
 
                     if (line.Equals("quit"))
                     {
-                        this.client.Dispose();
                         return;
                     }
                 }
@@ -110,18 +52,6 @@ namespace VerifyBot
             {
                 Console.WriteLine($"Aplication crashing. Reason: {ex}");
             }
-        }
-
-        private async void RemindVerify(object service)
-        {
-            var remind = service as RemindVerifyService;
-
-            if (remind == null)
-            {
-                return;
-            }
-
-            await remind.Process();
         }
 
         private static void Main(string[] args) => new Program().Run().GetAwaiter().GetResult();
@@ -137,6 +67,76 @@ namespace VerifyBot
             }
         }
 
+        private void LoadContainerAsync()
+        {
+            this.container = new Container();
+
+            //// Configuration services
+            container.Register(ConfigurationFactory.Get, Lifestyle.Singleton);
+
+            //// Client object
+            container.Register(() => DiscordClientFactory.Get(ConfigurationFactory.Get()).Result, Lifestyle.Singleton);
+            
+            //// Userstrings
+            container.Register(UserStringsFactory.Get, Lifestyle.Singleton);
+
+            //// Manager service
+            container.Register<Manager>(Lifestyle.Singleton);
+
+            //// verify services
+            container.Register<WorldVerificationService>(Lifestyle.Singleton);
+            container.Register<ReverifyService>(Lifestyle.Singleton);
+            container.Register<RemindVerifyService>(Lifestyle.Singleton);
+
+            container.Verify();
+        }
+
+        private Task Log(LogMessage msg)
+        {
+            Console.WriteLine(msg.ToString());
+            return Task.CompletedTask;
+        }
+
+        private async Task MessageReceived(SocketMessage message)
+        {
+            try
+            {
+                if (message.Author.IsBot)
+                {
+                    return;
+                }
+
+                if (message.Channel is IDMChannel)
+                {
+                    await container.GetInstance<WorldVerificationService>().Process(message);
+                }
+
+                if (message.Channel is IGuildChannel && message.Content.Contains("!verify"))
+                {
+                    if (message.Author is IGuildUser)
+                    {
+                        await container.GetInstance<RemindVerifyService>().SendInstructions(message.Author as IGuildUser);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occured while processing message: {ex.Message}");
+            }
+        }
+
+        private async void RemindVerify(object service)
+        {
+            var remind = service as RemindVerifyService;
+
+            if (remind == null)
+            {
+                return;
+            }
+
+            await remind.Process();
+        }
+
         private async void RunVerification(object service)
         {
             var verify = service as ReverifyService;
@@ -147,6 +147,28 @@ namespace VerifyBot
             }
 
             await verify.Process();
+        }
+
+        private async Task UserJoined(SocketGuildUser userCandidate)
+        {
+            try
+            {
+                var user = userCandidate as IGuildUser;
+
+                if (user == null)
+                {
+                    return;
+                }
+
+                var strings = this.container.GetInstance<UserStrings>();
+                var pm = await user.CreateDMChannelAsync();
+
+                await pm.SendMessageAsync(strings.InitialMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occured when sending initial message: {ex.Message}");
+            }
         }
     }
 }

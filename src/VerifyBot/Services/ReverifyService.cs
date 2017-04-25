@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using VerifyBot.Models;
 
 namespace VerifyBot.Services
 {
@@ -8,9 +9,12 @@ namespace VerifyBot.Services
     {
         private readonly Manager manager;
 
-        public ReverifyService(Manager manager)
+        private readonly UserStrings strings;
+
+        public ReverifyService(Manager manager, UserStrings strings)
         {
             this.manager = manager;
+            this.strings = strings;
         }
 
         public async Task Process()
@@ -36,7 +40,7 @@ namespace VerifyBot.Services
             {
                 var dbUser = await manager.GetDatabaseUser(discordUser.Id);
                 if (dbUser == null)
-                { 
+                {
                     await manager.UnverifyUser(discordUser, dbUser);
                     continue;
                 }
@@ -46,7 +50,7 @@ namespace VerifyBot.Services
                 {
                     try
                     {
-                        var verifier = Verifier.Create(dbUser.AccountID, dbUser.APIKey, manager, discordUser);
+                        var verifier = VerifyService.Create(dbUser.AccountID, dbUser.APIKey, manager, discordUser, strings);
                         await verifier.Validate();
 
                         if (!verifier.IsValid)

@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using VerifyBot.Models;
 
 namespace VerifyBot.Services
 {
@@ -9,9 +10,12 @@ namespace VerifyBot.Services
     {
         private readonly Manager manager;
 
-        public RemindVerifyService(Manager manager)
+        private readonly UserStrings strings;
+
+        public RemindVerifyService(Manager manager, UserStrings strings)
         {
             this.manager = manager;
+            this.strings = strings;
         }
 
         public async Task Process()
@@ -26,9 +30,26 @@ namespace VerifyBot.Services
             }
         }
 
+        public async Task SendInstructions(IGuildUser user)
+        {
+            var channel = await user.CreateDMChannelAsync();
+
+            if (manager.IsUserVerified(user))
+            {
+                await channel.SendMessageAsync(this.strings.AccountAlreadyVerified);
+            }
+            else
+            {
+                await channel.SendMessageAsync(this.strings.VerificationReminder);
+                Console.WriteLine($"Instructed {user.Nickname} ({user.Id})");
+            }
+
+            await channel.CloseAsync();
+        }
+
         private async Task RemindUsers()
         {
-            var verifyRoleId = manager.VerifyRoleId;
+            var verifyRoleId = manager.verifyRoleId;
 
             var allUsers = await manager.GetDiscordUsers();
             var unverifiedUsers = allUsers.Where(u => !manager.IsUserVerified(u));
@@ -36,27 +57,10 @@ namespace VerifyBot.Services
             foreach (var user in unverifiedUsers)
             {
                 var channel = await user.CreateDMChannelAsync();
-                await channel.SendMessageAsync(VerifyStrings.VerificationReminder);
+                await channel.SendMessageAsync(this.strings.VerificationReminder);
                 Console.WriteLine($"reminded {user.Nickname} ({user.Id})");
                 await channel.CloseAsync();
             }
-        }
-
-        public async Task SendInstructions(IGuildUser user)
-        {
-            var channel = await user.CreateDMChannelAsync();
-
-            if (manager.IsUserVerified(user))
-            {
-                await channel.SendMessageAsync(VerifyStrings.AccountAlreadyVerified);
-            }
-            else
-            {
-                await channel.SendMessageAsync(VerifyStrings.VerificationReminder);
-                Console.WriteLine($"Instructed {user.Nickname} ({user.Id})");
-            }
-
-            await channel.CloseAsync();
         }
     }
 }

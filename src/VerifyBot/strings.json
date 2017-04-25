@@ -1,0 +1,13 @@
+﻿{
+  "AccountAlreadyVerified": "Account is already verified. If you are having issues message a verifier",
+  "AccountNameDoesNotMatch": "API Key account does not match supplied account name.",
+  "AccountNotInAPI": "Could not find that account in the GW2 API.",
+  "AccountNotOnServer": "Account is not on a valid server.",
+  "EndMessage": "Verification Process Complete. Welcome!",
+  "ErrorMessage": "Error processing your verification request. Please try again.",
+  "InvalidAPIKey": "Bad API Key",
+  "NotValidLevel": "This account does not have a WvW-eligible character. (Level 60+)",
+  "ParseError": "Could not parse your response.",
+  "VerificationReminder": "Hello, friend!\r\n\r\nIt appears that you are not verified yet. Below are some instructions on how to get started with our verification process. If you have any questions, feel free to ask in the discord-help channel.\r\n\r\n**Instructions on how to verify**\r\nhttps://docs.google.com/document/d/14i3S1KxjlZoiJfkBsf2r6HRediVl1TXNZJo7F-xmVgs - English\r\nhttps://docs.google.com/document/d/1FO7kg_CIIjoZaUqZXKPJ8LUfpfmftfbQ2lrOIZsNrBI - Chinese",
+  "InitialMessage": "Welcome to the JQ Discord!\r\n\r\n**Instructions on how to verify**\r\nhttps://docs.google.com/document/d/14i3S1KxjlZoiJfkBsf2r6HRediVl1TXNZJo7F-xmVgs - English\r\nhttps://docs.google.com/document/d/1FO7kg_CIIjoZaUqZXKPJ8LUfpfmftfbQ2lrOIZsNrBI - Chinese"
+}

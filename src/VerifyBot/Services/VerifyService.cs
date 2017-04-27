@@ -13,9 +13,9 @@ namespace VerifyBot.Services
         private static readonly Regex AccountNameApiKeyRegex = new Regex(@"\s*(.+?\.\d+)\s+(.*?-.*?-.*?-.*?-.*)\s*$");
         private readonly UserStrings strings;
 
-        public VerifyService(string accountName, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel)
+        public VerifyService(string accountId, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel)
         {
-            AccoutName = accountName;
+            AccoutId = accountId;
             APIKey = apiKey;
             Requestor = requestor;
             Channel = channel;
@@ -30,7 +30,7 @@ namespace VerifyBot.Services
 
         public Account Account { get; private set; }
 
-        public string AccoutName { get; private set; }
+        public string AccoutId { get; private set; }
 
         public string APIKey { get; private set; }
 
@@ -102,7 +102,7 @@ namespace VerifyBot.Services
                 return;
             }
 
-            if (account.Name.ToLower() != AccoutName.ToLower())
+            if (account.Id != AccoutId)
             {
                 await SendMessageAsync(this.strings.AccountNameDoesNotMatch);
                 Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account. (Case matters)");

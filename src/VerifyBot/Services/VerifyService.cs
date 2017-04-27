@@ -120,11 +120,11 @@ namespace VerifyBot.Services
         }
 
         private async Task ValidateCharacters()
-        {
-            var characters = await API.GetCharactersAsync();
-
+        {           
             if (Account.Access == "PlayForFree")
             {
+                var characters = await API.GetCharactersAsync();
+
                 var isWvWLevel = false;
                 foreach (var character in characters)
                 {

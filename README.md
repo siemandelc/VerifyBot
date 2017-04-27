@@ -4,9 +4,12 @@ A bot that uses the Discord.NET and Guild Wars 2 API's to verify what world a us
 
 You'll need a verified rank in Discord and a #verify text channel. When a user types !verify the bot will message them with instructions. Once a user is verified an entry is made into a SQLite database and the user is given the verified rank.
 
-You'll need to add a secrets.txt file to the directory that the executable is running from. Here are the required fields.
+You'll need to add a secrets.json file to the directory that the executable is running from. Here are the required fields.
 ```
-world_id: 1001,1008   
-server_id: your_discord_server_id_here   
-discord_token: your_discord_bot_token_here
+{
+	"WorldIds": [ 1008, 1001, 1013 ],
+	"ServerId": your_discord_server_id_here,
+	"DiscordToken": "your_discord_bot_token_here",
+	"VerifyRole": "your_verified_role_name_here"
+}
 ```

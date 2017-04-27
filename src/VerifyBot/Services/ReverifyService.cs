@@ -41,6 +41,11 @@ namespace VerifyBot.Services
                 var dbUser = await manager.GetDatabaseUser(discordUser.Id);
                 if (dbUser == null)
                 {
+                    if (discordUser.GuildPermissions.Administrator)
+                    {
+                        continue;
+                    }
+
                     await manager.UnverifyUser(discordUser, dbUser);
                     continue;
                 }

@@ -56,7 +56,7 @@ namespace VerifyBot.Services
                     try
                     {
                         var verifier = VerifyService.Create(dbUser.AccountID, dbUser.APIKey, manager, discordUser, strings);
-                        await verifier.Validate();
+                        await verifier.Validate(true);
 
                         if (verifier.IsValid)
                             Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is still valid");

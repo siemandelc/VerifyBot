@@ -25,7 +25,7 @@ namespace VerifyBot.Services
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 
                 var request = await VerifyService.CreateFromRequestMessage(e, manager, this.strings);
-                await request.Validate();
+                await request.Validate(false);
 
                 if (!request.IsValid)
                     return;

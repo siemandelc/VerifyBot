@@ -13,9 +13,10 @@ namespace VerifyBot.Services
         private static readonly Regex AccountNameApiKeyRegex = new Regex(@"\s*(.+?\.\d+)\s+(.*?-.*?-.*?-.*?-.*)\s*$");
         private readonly UserStrings strings;
 
-        public VerifyService(string accountId, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel)
+        public VerifyService(string accountId, string accountName, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel)
         {
             AccoutId = accountId;
+            AccountName = accountName;
             APIKey = apiKey;
             Requestor = requestor;
             Channel = channel;
@@ -31,6 +32,8 @@ namespace VerifyBot.Services
         public Account Account { get; private set; }
 
         public string AccoutId { get; private set; }
+
+        public string AccountName { get; private set; }
 
         public string APIKey { get; private set; }
 
@@ -53,7 +56,7 @@ namespace VerifyBot.Services
 
         public static VerifyService Create(string accountName, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel = null)
         {
-            return new VerifyService(accountName, apiKey, manager, requestor, strings, channel);
+            return new VerifyService(accountName, null, apiKey, manager, requestor, strings, channel);
         }
 
         public static async Task<VerifyService> CreateFromRequestMessage(IMessage requestMessage, Manager manager, UserStrings strings)
@@ -74,7 +77,7 @@ namespace VerifyBot.Services
                 return null;
             }
 
-            return new VerifyService(tokens[1], tokens[2], manager, requestMessage.Author, strings, requestMessage.Channel);
+            return new VerifyService(null, tokens[1], tokens[2], manager, requestMessage.Author, strings, requestMessage.Channel);
         }
 
         public async Task<IUserMessage> SendMessageAsync(string message)
@@ -84,14 +87,14 @@ namespace VerifyBot.Services
             return await Channel.SendMessageAsync(message);
         }
 
-        public async Task Validate()
+        public async Task Validate(bool isReverify)
         {
-            await ValidateAccount();
+            await ValidateAccount(isReverify);
             if (IsValidAccount)
                 await ValidateCharacters();
         }
 
-        private async Task ValidateAccount()
+        private async Task ValidateAccount(bool isReverify)
         {
             var account = await API.GetAccountAsync();
 
@@ -102,11 +105,22 @@ namespace VerifyBot.Services
                 return;
             }
 
-            if (account.Id != AccoutId)
+            if (isReverify)
             {
-                await SendMessageAsync(this.strings.AccountNameDoesNotMatch);
-                Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account. (Case matters)");
-                return;
+                if (account.Id != AccoutId)
+                {                    
+                    Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account ID.");
+                    return;
+                }
+            }
+            else
+            {
+                if (account.Name != AccountName)
+                {
+                    await SendMessageAsync(this.strings.AccountNameDoesNotMatch);
+                    Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account. (Case matters)");
+                    return;
+                }
             }
 
             if (!Manager.IsAccountOnOurWorld(account))

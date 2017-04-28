@@ -61,7 +61,10 @@ namespace VerifyBot.Services
                     {
                         Console.WriteLine("Rate Limited, waiting");
                         await Task.Delay((DateTime.Now - timestamp).Seconds + 1);
+
+                        count++;
                         timestamp = DateTime.Now;
+
                         Console.WriteLine("Resuming stats");
                     }
                 }

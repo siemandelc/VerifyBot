@@ -38,16 +38,25 @@ namespace VerifyBot.Services
 
             foreach (var discordUser in verifiedNonBotUsers)
             {
+                Console.WriteLine($"Verifying user {discordUser.Nickname ?? discordUser.Username}");
+
                 var dbUser = await manager.GetDatabaseUser(discordUser.Id);
                 if (dbUser == null)
                 {
-                    if (discordUser.GuildPermissions.Administrator)
+                    try
                     {
+                        if (discordUser.GuildPermissions.Administrator)
+                        {
+                            continue;
+                        }
+
+                        await manager.UnverifyUser(discordUser, dbUser);
                         continue;
                     }
-
-                    await manager.UnverifyUser(discordUser, dbUser);
-                    continue;
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error while checking user {discordUser.Nickname ?? discordUser.Username}: {ex.Message}");
+                    }
                 }
 
                 var attempts = 0;
@@ -68,7 +77,7 @@ namespace VerifyBot.Services
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error removing user {discordUser.Nickname ?? discordUser.Username} ({discordUser.Id})");
-                        Console.WriteLine($"Error: {ex}");
+                        //Console.WriteLine($"Error: {ex}");
                         attempts++;
                     }
                 }

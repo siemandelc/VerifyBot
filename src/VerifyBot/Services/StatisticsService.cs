@@ -14,6 +14,7 @@ namespace VerifyBot.Services
         public StatisticsService(Manager manager, UserStrings strings)
         {
             this.manager = manager;
+            this.strings = strings;
         }
 
         public async Task GetStatistics()

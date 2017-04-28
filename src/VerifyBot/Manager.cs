@@ -68,7 +68,7 @@ namespace VerifyBot
             var i = 0;
             foreach (var roleId in discordUser.RoleIds)
                 userRoles[i++] = discord.GetRole(roleId);
-            await discordUser.RemoveRolesAsync(userRoles);
+            await discordUser.RemoveRolesAsync(userRoles);            
 
             if (dbUser == null)
                 dbUser = await GetDatabaseUser(discordUser.Id);

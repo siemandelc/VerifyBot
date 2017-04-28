@@ -74,9 +74,9 @@ namespace VerifyBot.Services
 
                         break;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        Console.WriteLine($"Error removing user {discordUser.Nickname ?? discordUser.Username} ({discordUser.Id})");
+                        Console.WriteLine($"Error reverifying user {discordUser.Nickname ?? discordUser.Username} ({discordUser.Id})");
                         //Console.WriteLine($"Error: {ex}");
                         attempts++;
                     }

@@ -37,9 +37,13 @@ namespace VerifyBot
                     var line = Console.ReadLine();
 
                     if (line.Equals("reverify"))
-                    {
-                        Console.WriteLine("Reverifying...");
+                    {                        
                         await container.GetInstance<ReverifyService>().Process();
+                    }
+
+                    if (line.Equals("stats"))
+                    {
+                        await container.GetInstance<StatisticsService>().GetStatistics();
                     }
 
                     if (line.Equals("quit"))
@@ -87,6 +91,7 @@ namespace VerifyBot
             container.Register<WorldVerificationService>(Lifestyle.Singleton);
             container.Register<ReverifyService>(Lifestyle.Singleton);
             container.Register<RemindVerifyService>(Lifestyle.Singleton);
+            container.Register<StatisticsService>(Lifestyle.Singleton);
 
             container.Verify();
         }
@@ -148,6 +153,7 @@ namespace VerifyBot
 
             await verify.Process();
         }
+               
 
         private async Task UserJoined(SocketGuildUser userCandidate)
         {

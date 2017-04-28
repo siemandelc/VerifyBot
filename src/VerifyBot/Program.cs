@@ -91,6 +91,7 @@ namespace VerifyBot
             container.Register<WorldVerificationService>(Lifestyle.Singleton);
             container.Register<ReverifyService>(Lifestyle.Singleton);
             container.Register<RemindVerifyService>(Lifestyle.Singleton);
+            container.Register<StatisticsService>(Lifestyle.Singleton)();
 
             container.Verify();
         }

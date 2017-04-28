@@ -39,6 +39,14 @@ namespace VerifyBot.Services
 
         public IMessageChannel Channel { get; private set; }
 
+        public int World
+        {
+            get
+            {
+                return this.Account?.WorldId ?? -999;
+            }
+        }
+
         public bool IsValid
         {
             get { return IsValidAccount && HasValidCharacter; }
@@ -94,6 +102,16 @@ namespace VerifyBot.Services
                 await ValidateCharacters();
         }
 
+        public async Task LoadAccount()
+        {
+            var account = await API.GetAccountAsync();
+
+            if (account != null)
+            {
+                Account = account;
+            }           
+        }
+
         private async Task ValidateAccount(bool isReverify)
         {
             var account = await API.GetAccountAsync();
@@ -104,6 +122,8 @@ namespace VerifyBot.Services
                 Console.WriteLine($"Could not verify {Requestor.Username} - Cannont access account in GW2 API.");
                 return;
             }
+
+            Account = account;
 
             if (isReverify)
             {
@@ -128,9 +148,7 @@ namespace VerifyBot.Services
                 await SendMessageAsync(this.strings.AccountNotOnServer);
                 Console.WriteLine($"Could not verify {Requestor.Username} - Not on Server.");
                 return;
-            }
-
-            Account = account;
+            }            
         }
 
         private async Task ValidateCharacters()

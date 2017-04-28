@@ -37,9 +37,13 @@ namespace VerifyBot
                     var line = Console.ReadLine();
 
                     if (line.Equals("reverify"))
-                    {
-                        Console.WriteLine("Reverifying...");
+                    {                        
                         await container.GetInstance<ReverifyService>().Process();
+                    }
+
+                    if (line.Equals("stats"))
+                    {
+                        await container.GetInstance<StatisticsService>().GetStatistics();
                     }
 
                     if (line.Equals("quit"))
@@ -148,6 +152,7 @@ namespace VerifyBot
 
             await verify.Process();
         }
+               
 
         private async Task UserJoined(SocketGuildUser userCandidate)
         {

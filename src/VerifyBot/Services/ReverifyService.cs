@@ -54,7 +54,7 @@ namespace VerifyBot.Services
                 while (attempts < 3)
                 {
                     try
-                    {
+                    {                       
                         var verifier = VerifyService.Create(dbUser.AccountID, dbUser.APIKey, manager, discordUser, strings);
                         await verifier.Validate(true);
 

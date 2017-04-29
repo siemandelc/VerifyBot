@@ -64,24 +64,41 @@ namespace VerifyBot
 
         public async Task UnverifyUser(IGuildUser discordUser, User dbUser = null)
         {
-            var userRoles = new IRole[discordUser.RoleIds.Count];
-            var i = 0;
-            foreach (var roleId in discordUser.RoleIds)
-                userRoles[i++] = discord.GetRole(roleId);
-            await discordUser.RemoveRolesAsync(userRoles);
-
-            if (dbUser == null)
-                dbUser = await GetDatabaseUser(discordUser.Id);
-
-            if (dbUser != null)
+            try
             {
-                db.Users.Remove(dbUser);
-                await db.SaveChangesAsync();
-                Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is no longer valid");
+                //// Can't remove @everyone role.
+                var everyone = discord.Roles.FirstOrDefault(x => x.Name == "@everyone");
+                var rolesToRemove = new List<IRole>();
+
+                foreach (var roleId in discordUser.RoleIds)
+                {
+                    if (roleId == everyone.Id)
+                    {
+                        continue;
+                    }
+
+                    rolesToRemove.Add(discord.GetRole(roleId));                    
+                }
+
+                await discordUser.RemoveRolesAsync(rolesToRemove);
+
+                if (dbUser == null)
+                    dbUser = await GetDatabaseUser(discordUser.Id);
+
+                if (dbUser != null)
+                {
+                    db.Users.Remove(dbUser);
+                    await db.SaveChangesAsync();
+                    Console.WriteLine($"User {discordUser.Nickname ?? discordUser.Username} is no longer valid");
+                }
+                else
+                {
+                    Console.WriteLine($"Manually verified user {discordUser.Nickname ?? discordUser.Username} is no longer valid");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Manually verified user {discordUser.Nickname ?? discordUser.Username} is no longer valid");
+                Console.WriteLine(ex);
             }
         }
 

@@ -26,9 +26,6 @@ namespace VerifyBot.Services
                 var counts = new Dictionary<int, int>();
                 var discordUsers = await manager.GetDiscordUsers();
 
-                var timestamp = DateTime.Now;
-                var count = 0;
-
                 foreach (var discordUser in discordUsers)
                 {
                     var dbUser = await manager.GetDatabaseUser(discordUser.Id);
@@ -47,26 +44,13 @@ namespace VerifyBot.Services
                         {
                             counts.Add(verifier.World, 0);
                         }
-
-                        counts[verifier.World] = counts[verifier.World]++;
+                        
+                        counts[verifier.World] = counts[verifier.World] + 1;
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine($"Could not load information for user {discordUser.Nickname ?? discordUser.Username} ({dbUser.APIKey})");
-                    }
-
-                    count++;
-
-                    if (count >= 450 && (DateTime.Now - timestamp).Seconds < 60)
-                    {
-                        Console.WriteLine("Rate Limited, waiting");
-                        await Task.Delay((DateTime.Now - timestamp).Seconds + 1);
-
-                        count++;
-                        timestamp = DateTime.Now;
-
-                        Console.WriteLine("Resuming stats");
-                    }
+                        Console.WriteLine($"Could not load information for user {discordUser.Username} ({dbUser.APIKey})");
+                    }                
                 }
 
                 foreach (var value in counts)

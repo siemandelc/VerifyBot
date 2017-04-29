@@ -60,6 +60,8 @@ namespace VerifyBot.Services
 
         private bool IsValidAccount { get { return Account != null; } }
 
+        private bool IsOnWorld { get; set; }
+
         private Manager Manager { get; set; }
 
         public static VerifyService Create(string accountName, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel = null)
@@ -123,8 +125,6 @@ namespace VerifyBot.Services
                 return;
             }
 
-            Account = account;
-
             if (isReverify)
             {
                 if (account.Id != AccoutId)
@@ -148,7 +148,9 @@ namespace VerifyBot.Services
                 await SendMessageAsync(this.strings.AccountNotOnServer);
                 Console.WriteLine($"Could not verify {Requestor.Username} - Not on Server.");
                 return;
-            }            
+            }
+
+            Account = account;
         }
 
         private async Task ValidateCharacters()

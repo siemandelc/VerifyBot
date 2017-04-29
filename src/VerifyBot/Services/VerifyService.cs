@@ -26,18 +26,18 @@ namespace VerifyBot.Services
 
             API = new ApiFacade(APIKey);
 
-            HasValidCharacter = false;
+            HasValidCharacter = false;            
         }
 
         public Account Account { get; private set; }
 
-        public string AccoutId { get; private set; }
+        public string AccoutId { get; }
 
-        public string AccountName { get; private set; }
+        public string AccountName { get; }
 
-        public string APIKey { get; private set; }
+        public string APIKey { get; }
 
-        public IMessageChannel Channel { get; private set; }
+        public IMessageChannel Channel { get; }
 
         public int World
         {
@@ -47,22 +47,17 @@ namespace VerifyBot.Services
             }
         }
 
-        public bool IsValid
-        {
-            get { return IsValidAccount && HasValidCharacter; }
-        }
+        public bool IsValid => IsValidAccount && HasValidCharacter;
 
-        public IUser Requestor { get; private set; }
+        public IUser Requestor { get; }
 
-        private ApiFacade API { get; set; }
+        private ApiFacade API { get; }
 
         private bool HasValidCharacter { get; set; }
 
-        private bool IsValidAccount { get { return Account != null; } }
+        private bool IsValidAccount => Account != null;
 
-        private bool IsOnWorld { get; set; }
-
-        private Manager Manager { get; set; }
+        private Manager Manager { get; }
 
         public static VerifyService Create(string accountName, string apiKey, Manager manager, IUser requestor, UserStrings strings, IMessageChannel channel = null)
         {

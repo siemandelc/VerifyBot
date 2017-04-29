@@ -76,17 +76,21 @@ namespace VerifyBot.Gw2Api
         private T DeserializeJson<T>(string json)
         {
             var serializer = new DataContractJsonSerializer(typeof(T));
-            var ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
-            var result = (T)serializer.ReadObject(ms);
-            return result;
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            {
+                var result = (T)serializer.ReadObject(ms);
+                return result;
+            }
         }
 
         private async Task<string> GetJsonAsync(string url)
         {
-            HttpClient http = new HttpClient();
-            var response = await http.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            using (HttpClient http = new HttpClient())
+            {
+                var response = await http.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
         }
 
         #endregion JSON Helpers

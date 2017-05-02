@@ -21,6 +21,8 @@ namespace VerifyBot.Services
         {
             try
             {
+                Console.WriteLine($"Message: {e.Content}");
+
                 Console.WriteLine($"Begin verification for {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 

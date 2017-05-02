@@ -66,7 +66,7 @@ namespace VerifyBot.Services
 
         public static async Task<VerifyService> CreateFromRequestMessage(IMessage requestMessage, Manager manager, UserStrings strings)
         {
-            var tokens = AccountNameApiKeyRegex.Split(requestMessage.Content);
+            var tokens = AccountNameApiKeyRegex.Split(requestMessage.Content.Trim());
 
             if (tokens.Length != 4)
             {

@@ -88,10 +88,10 @@ namespace VerifyBot
             container.Register<Manager>(Lifestyle.Singleton);
 
             //// verify services
-            container.Register<WorldVerificationService>(Lifestyle.Singleton);
-            container.Register<ReverifyService>(Lifestyle.Singleton);
-            container.Register<RemindVerifyService>(Lifestyle.Singleton);
-            container.Register<StatisticsService>(Lifestyle.Singleton);
+            container.Register<WorldVerificationService>(Lifestyle.Transient);
+            container.Register<ReverifyService>(Lifestyle.Transient);
+            container.Register<RemindVerifyService>(Lifestyle.Transient);
+            container.Register<StatisticsService>(Lifestyle.Transient);
 
             container.Verify();
         }

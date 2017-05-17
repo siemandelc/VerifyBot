@@ -54,7 +54,7 @@ namespace VerifyBot
 
         public bool IsUserVerified(IGuildUser user)
         {
-            if (user.RoleIds.Count == 0)
+            if ((user?.RoleIds?.Count ?? 0) == 0)
             {
                 return false;
             }

@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using SimpleInjector;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using VerifyBot.Factories;
@@ -49,6 +50,16 @@ namespace VerifyBot
                     if (line.Equals("quit"))
                     {
                         return;
+                    }
+
+                    if (line.StartsWith("lookup"))
+                    {
+                        var split = line.Split(' ');
+
+                        if (split.Count() == 2)
+                        {
+                            await container.GetInstance<LookupService>().LookupAsync(split[1]);
+                        }
                     }
                 }
             }

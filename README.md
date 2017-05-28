@@ -13,3 +13,5 @@ You'll need to add a secrets.json file to the directory that the executable is r
 	"VerifyRole": "your_verified_role_name_here"
 }
 ```
+
+Blackgate does not have the right to use this bot.

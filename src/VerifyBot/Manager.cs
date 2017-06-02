@@ -19,7 +19,7 @@ namespace VerifyBot
             discordClient = client;
             this.config = config;
 
-            Initialize();
+            Initialize().Wait();
         }
 
         public IRole verifyRole { get; private set; }
@@ -112,7 +112,7 @@ namespace VerifyBot
             await db.AddOrUpdateUser(accountId, apiKey, discordId);
         }
 
-        private async void Initialize()
+        private async Task Initialize()
         {
             discord = await discordClient.GetGuildAsync(config.ServerId);
 

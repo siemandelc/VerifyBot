@@ -10,13 +10,15 @@ using VerifyBot.Models;
 
 namespace VerifyBot
 {
-    public class Manager : IDisposable
+    public class Manager
     {
         private readonly VerifyDatabase db = new VerifyDatabase();
 
+        private bool isInitialized;
+
         public Manager(DiscordSocketClient client, Configuration config)
         {
-            discordClient = client;
+            this.discordClient = client;
             this.config = config;
 
             Initialize().Wait();
@@ -104,6 +106,16 @@ namespace VerifyBot
 
         public async Task VerifyUser(ulong discordId, string accountId, string apiKey)
         {
+            if (!isInitialized)
+            {
+                await Initialize();
+            }
+
+            if (verifyRole == null)
+            {
+                throw new NullReferenceException("Verified User Role isn't set.");
+            }
+
             var user = await GetDiscordUser(discordId);
 
             if (!IsUserVerified(user))
@@ -113,7 +125,7 @@ namespace VerifyBot
         }
 
         private async Task Initialize()
-        {
+        {            
             discord = await discordClient.GetGuildAsync(config.ServerId);
 
             // set verify role id
@@ -123,29 +135,10 @@ namespace VerifyBot
             {
                 var msg = $"Unable to find server role matching verify role config of '{config.VerifyRole}'.";
                 Console.WriteLine(msg);
-                throw new InvalidOperationException(msg);
+                throw new InvalidOperationException(msg);                
             }
+
+            isInitialized = true;
         }
-
-        #region IDisposeable
-
-        private bool disposedValue = false; // To detect redundant calls
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                    db.Dispose();
-                disposedValue = true;
-            }
-        }
-
-        #endregion IDisposeable
     }
 }

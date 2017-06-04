@@ -43,10 +43,10 @@ namespace VerifyBot.Services
                 await e.Channel.SendMessageAsync(this.strings.EndMessage);
                 Console.WriteLine($"{e.Author.Username} Verified.");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex)            {
+                
                 await e.Channel.SendMessageAsync(this.strings.ErrorMessage);
-                Console.WriteLine($"Error: {ex.ToString()}");
+                Console.WriteLine($"Error: {ex.ToString()}");                
             }
         }
     }

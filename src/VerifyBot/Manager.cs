@@ -40,7 +40,7 @@ namespace VerifyBot
         }
 
         public async Task<IGuildUser> GetDiscordUser(ulong id)
-        {
+        {            
             return await discord.GetUserAsync(id);
         }
 
@@ -115,8 +115,14 @@ namespace VerifyBot
             {
                 throw new NullReferenceException("Verified User Role isn't set.");
             }
-
+                                
             var user = await GetDiscordUser(discordId);
+
+            if (user == null)
+            {
+                /// User is offline, notify
+                
+            }
 
             if (!IsUserVerified(user))
                 await user.AddRoleAsync(verifyRole);

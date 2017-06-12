@@ -17,6 +17,7 @@ namespace VerifyBot.Factories
             {
                 client = new DiscordSocketClient(new DiscordSocketConfig()
                 {
+                    LogLevel = LogSeverity.Info,                   
                     WebSocketProvider = WS4NetProvider.Instance
                 });
             }
@@ -30,14 +31,26 @@ namespace VerifyBot.Factories
                Console.WriteLine(m.ToString());
                return Task.CompletedTask;
            };
-
+            
             await client.LoginAsync(TokenType.Bot, config.DiscordToken);
             await client.StartAsync();
-
-            while (client.ConnectionState != ConnectionState.Connected)
+         
+            var ready = false;
+            client.Ready += () =>
             {
-                await Task.Delay(500);
+                ready = true;
+                return Task.CompletedTask;
+            };
+
+            Console.WriteLine("Waiting for DiscordSocketClient to initialize...");
+
+            while (!ready)
+            {
+                await Task.Delay(1000);
+                Console.WriteLine("Waiting...");
             }
+
+            Console.WriteLine(" DiscordSocketClient initialized.");
 
             return client;
         }

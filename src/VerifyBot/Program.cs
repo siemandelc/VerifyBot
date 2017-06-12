@@ -18,8 +18,6 @@ namespace VerifyBot
         private Timer reminderTimer;
         private Timer reverifyTimer;
 
-        private bool isReady { get; set; }
-
         public async Task Run()
         {
             try
@@ -29,20 +27,8 @@ namespace VerifyBot
 
                 var client = container.GetInstance<DiscordSocketClient>();
 
-                client.Ready += ClientReady;
-
-                Console.WriteLine("Waiting for DiscordSocketClient to initialize");
-                while (!isReady)
-                {
-                    await Task.Delay(1000);
-                    Console.WriteLine("Waiting...");
-                }
-
-                Console.WriteLine("DiscordSocketClient initialized! Loading services");
-
                 client.MessageReceived += MessageReceived;
-                client.UserJoined += UserJoined;
-                
+                client.UserJoined += UserJoined;                
 
                 this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
                 this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);
@@ -96,12 +82,6 @@ namespace VerifyBot
                 Console.WriteLine("Database does not exist. Run the following command: dotnet ef database update");
                 throw new Exception("No Database");
             }
-        }
-
-        private async Task ClientReady()
-        {
-            await Task.Delay(1);
-            isReady = true;
         }
 
         private Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)

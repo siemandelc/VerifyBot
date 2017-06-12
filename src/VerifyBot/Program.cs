@@ -123,7 +123,7 @@ namespace VerifyBot
             container.Register(UserStringsFactory.Get, Lifestyle.Singleton);
 
             //// Manager service
-            container.Register<Manager>(Lifestyle.Singleton);
+            container.Register<Manager>(Lifestyle.Transient);
 
             //// verify services
             container.Register<WorldVerificationService>(Lifestyle.Transient);
@@ -151,7 +151,7 @@ namespace VerifyBot
 
                 if (message.Channel is IDMChannel)
                 {
-                    await container.GetInstance<WorldVerificationService>().Process(message);
+                    await container.GetInstance<WorldVerificationService>().Process(message);                    
                 }
 
                 if (message.Channel is IGuildChannel && message.Content.Contains("!verify"))

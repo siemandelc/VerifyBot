@@ -26,6 +26,12 @@ namespace VerifyBot.Services
                 Console.WriteLine($"Begin verification for {e.Author.Username}");
                 await e.Channel.SendMessageAsync("Starting Verification Process...");
 
+                if (e.Author.Status == UserStatus.Invisible)
+                {
+                    await e.Channel.SendMessageAsync("You cannot be set to invisible while Verifying. Please change your discord status to Online");
+                    return;
+                }
+
                 var request = await VerifyService.CreateFromRequestMessage(e, manager, this.strings);
 
                 if (request == null)
@@ -43,10 +49,10 @@ namespace VerifyBot.Services
                 await e.Channel.SendMessageAsync(this.strings.EndMessage);
                 Console.WriteLine($"{e.Author.Username} Verified.");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex)            {
+                
                 await e.Channel.SendMessageAsync(this.strings.ErrorMessage);
-                Console.WriteLine($"Error: {ex.ToString()}");
+                Console.WriteLine($"Error: {ex.ToString()}");                
             }
         }
     }

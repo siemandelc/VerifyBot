@@ -18,6 +18,8 @@ namespace VerifyBot
         private Timer reminderTimer;
         private Timer reverifyTimer;
 
+        private bool isReady { get; set; }
+
         public async Task Run()
         {
             try
@@ -27,18 +29,32 @@ namespace VerifyBot
 
                 var client = container.GetInstance<DiscordSocketClient>();
 
+                client.Ready += ClientReady;
+
+                Console.WriteLine("Waiting for DiscordSocketClient to initialize");
+                while (!isReady)
+                {
+                    await Task.Delay(1000);
+                    Console.WriteLine("Waiting...");
+                }
+
+                Console.WriteLine("DiscordSocketClient initialized! Loading services");
+
                 client.MessageReceived += MessageReceived;
                 client.UserJoined += UserJoined;
+                
 
                 this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
                 this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);
+
+                Console.WriteLine("Verifybot running");
 
                 while (true)
                 {
                     var line = Console.ReadLine();
 
                     if (line.Equals("reverify"))
-                    {                        
+                    {
                         await container.GetInstance<ReverifyService>().Process();
                     }
 
@@ -82,6 +98,17 @@ namespace VerifyBot
             }
         }
 
+        private async Task ClientReady()
+        {
+            await Task.Delay(1);
+            isReady = true;
+        }
+
+        private Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+        {
+            throw new NotImplementedException();
+        }
+
         private void LoadContainerAsync()
         {
             this.container = new Container();
@@ -91,7 +118,7 @@ namespace VerifyBot
 
             //// Client object
             container.Register(() => DiscordClientFactory.Get(ConfigurationFactory.Get()).Result, Lifestyle.Singleton);
-            
+
             //// Userstrings
             container.Register(UserStringsFactory.Get, Lifestyle.Singleton);
 
@@ -164,7 +191,6 @@ namespace VerifyBot
 
             await verify.Process();
         }
-               
 
         private async Task UserJoined(SocketGuildUser userCandidate)
         {

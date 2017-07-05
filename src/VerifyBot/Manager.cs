@@ -1,11 +1,11 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DL.GuildWars2Api.Models.V2;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VerifyBot.Gw2Api;
 using VerifyBot.Models;
 
 namespace VerifyBot
@@ -18,21 +18,21 @@ namespace VerifyBot
 
         public Manager(DiscordSocketClient client, Configuration config)
         {
-            this.discordClient = client;
-            this.config = config;
+            this.DiscordClient = client;
+            this.Config = config;
 
             Initialize().Wait();
         }
 
-        public IRole verifyRole { get; private set; }
+        public IRole VerifyRole { get; private set; }
 
-        public ulong verifyRoleId { get { return verifyRole.Id; } }
+        public ulong VerifyRoleId { get { return VerifyRole.Id; } }
 
-        private Configuration config { get; set; }
+        private Configuration Config { get; set; }
 
-        private IGuild discord { get; set; }
+        private IGuild Discord { get; set; }
 
-        private IDiscordClient discordClient { get; set; }
+        private IDiscordClient DiscordClient { get; set; }
 
         public async Task<User> GetDatabaseUser(ulong discordId)
         {
@@ -41,17 +41,17 @@ namespace VerifyBot
 
         public async Task<IGuildUser> GetDiscordUser(ulong id)
         {            
-            return await discord.GetUserAsync(id);
+            return await Discord.GetUserAsync(id);
         }
 
         public async Task<IReadOnlyCollection<IGuildUser>> GetDiscordUsers()
         {
-            return await discord.GetUsersAsync();
+            return await Discord.GetUsersAsync();
         }
 
         public bool IsAccountOnOurWorld(Account account)
         {
-            return config.WorldIds.Contains(account.WorldId);
+            return Config.WorldIds.Contains(account.WorldId);
         }
 
         public bool IsUserVerified(IGuildUser user)
@@ -61,7 +61,7 @@ namespace VerifyBot
                 return false;
             }
 
-            return user.RoleIds.Contains(verifyRoleId);
+            return user.RoleIds.Contains(VerifyRoleId);
         }
 
         public async Task UnverifyUser(IGuildUser discordUser, User dbUser = null)
@@ -69,7 +69,7 @@ namespace VerifyBot
             try
             {
                 //// Can't remove @everyone role.
-                var everyone = discord.Roles.FirstOrDefault(x => x.Name == "@everyone");
+                var everyone = Discord.Roles.FirstOrDefault(x => x.Name == "@everyone");
                 var rolesToRemove = new List<IRole>();
 
                 foreach (var roleId in discordUser.RoleIds)
@@ -79,7 +79,7 @@ namespace VerifyBot
                         continue;
                     }
 
-                    rolesToRemove.Add(discord.GetRole(roleId));                    
+                    rolesToRemove.Add(Discord.GetRole(roleId));                    
                 }
 
                 await discordUser.RemoveRolesAsync(rolesToRemove);
@@ -111,7 +111,7 @@ namespace VerifyBot
                 await Initialize();
             }
 
-            if (verifyRole == null)
+            if (VerifyRole == null)
             {
                 throw new NullReferenceException("Verified User Role isn't set.");
             }
@@ -125,21 +125,21 @@ namespace VerifyBot
             }
 
             if (!IsUserVerified(user))
-                await user.AddRoleAsync(verifyRole);
+                await user.AddRoleAsync(VerifyRole);
 
             await db.AddOrUpdateUser(accountId, apiKey, discordId);
         }
 
         private async Task Initialize()
         {            
-            discord = await discordClient.GetGuildAsync(config.ServerId);
+            Discord = await DiscordClient.GetGuildAsync(Config.ServerId);
 
             // set verify role id
-            verifyRole = discord.Roles.Where(x => x.Name == config.VerifyRole)?.FirstOrDefault();
+            VerifyRole = Discord.Roles.Where(x => x.Name == Config.VerifyRole)?.FirstOrDefault();
 
-            if (verifyRole == null)
+            if (VerifyRole == null)
             {
-                var msg = $"Unable to find server role matching verify role config of '{config.VerifyRole}'.";
+                var msg = $"Unable to find server role matching verify role config of '{Config.VerifyRole}'.";
                 Console.WriteLine(msg);
                 throw new InvalidOperationException(msg);                
             }

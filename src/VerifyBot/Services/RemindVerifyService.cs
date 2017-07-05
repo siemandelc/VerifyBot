@@ -32,7 +32,7 @@ namespace VerifyBot.Services
 
         public async Task SendInstructions(IGuildUser user)
         {
-            var channel = await user.CreateDMChannelAsync();
+            var channel = await user.GetOrCreateDMChannelAsync();
 
             if (manager.IsUserVerified(user))
             {
@@ -49,14 +49,14 @@ namespace VerifyBot.Services
 
         private async Task RemindUsers()
         {
-            var verifyRoleId = manager.verifyRoleId;
+            var verifyRoleId = manager.VerifyRoleId;
 
             var allUsers = await manager.GetDiscordUsers();
             var unverifiedUsers = allUsers.Where(u => !manager.IsUserVerified(u));
 
             foreach (var user in unverifiedUsers)
             {
-                var channel = await user.CreateDMChannelAsync();
+                var channel = await user.GetOrCreateDMChannelAsync();
                 await channel.SendMessageAsync(this.strings.VerificationReminder);
                 Console.WriteLine($"reminded {user.Nickname} ({user.Id})");
                 await channel.CloseAsync();

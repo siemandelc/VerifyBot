@@ -1,8 +1,9 @@
 ﻿using Discord;
+using DL.GuildWars2Api;
+using DL.GuildWars2Api.Models.V2;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using VerifyBot.Gw2Api;
 using VerifyBot.Models;
 
 namespace VerifyBot.Services
@@ -101,7 +102,7 @@ namespace VerifyBot.Services
 
         public async Task LoadAccount()
         {
-            var account = await API.GetAccountAsync();
+            var account = await API.V2.Authenticated.GetAccountAsync();
 
             if (account != null)
             {
@@ -111,7 +112,7 @@ namespace VerifyBot.Services
 
         private async Task ValidateAccount(bool isReverify)
         {
-            var account = await API.GetAccountAsync();
+            var account = await API.V2.Authenticated.GetAccountAsync();
 
             if (account == null)
             {
@@ -152,12 +153,12 @@ namespace VerifyBot.Services
         {           
             if (Account.Access == "PlayForFree")
             {
-                var characters = await API.GetCharactersAsync();
+                var characters = await API.V2.Authenticated.GetCharactersAsync();
 
                 var isWvWLevel = false;
                 foreach (var character in characters)
                 {
-                    var characterObj = await API.GetCharacterAsync(character);
+                    var characterObj = await API.V2.Authenticated.GetCharacterAsync(character);
 
                     if (characterObj.Level >= 60)
                     {

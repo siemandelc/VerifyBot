@@ -184,7 +184,7 @@ namespace VerifyBot
                 }
 
                 var strings = this.container.GetInstance<UserStrings>();
-                var pm = await user.CreateDMChannelAsync();
+                var pm = await user.GetOrCreateDMChannelAsync();
 
                 await pm.SendMessageAsync(strings.InitialMessage);
             }

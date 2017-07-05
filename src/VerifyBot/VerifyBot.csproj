@@ -15,11 +15,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Gw2Api\**" />
+    <EmbeddedResource Remove="Models\Gw2Api\**" />
+    <None Remove="Models\Gw2Api\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.0-*" />
+    <PackageReference Include="DL.GuildWars2Api" Version="1.0.0-CI00016" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="SimpleInjector" Version="4.0.7" />
+    <PackageReference Include="SimpleInjector" Version="4.0.8" />
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Threading.Timer" Version="4.3.0" />

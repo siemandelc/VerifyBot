@@ -54,14 +54,12 @@ namespace VerifyBot
                         return;
                     }
 
-                    if (line.StartsWith("lookup"))
+                    if (line.StartsWith("lookup "))
                     {
-                        var split = line.Split(' ');
-
-                        if (split.Count() == 2)
-                        {
-                            await container.GetInstance<LookupService>().LookupAsync(split[1]);
-                        }
+                        var username = line.Replace("lookup ", "");
+                        Console.WriteLine($"Searching for Discord accounts with the GW2 account name of {username}");
+                        await container.GetInstance<LookupService>().LookupAsync(username);
+                        
                     }
                 }
             }

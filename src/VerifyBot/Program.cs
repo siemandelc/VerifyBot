@@ -30,8 +30,9 @@ namespace VerifyBot
                 client.MessageReceived += MessageReceived;
                 client.UserJoined += UserJoined;                
 
-                this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
-                this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);
+                this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), 60000, dayInterval);
+                this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);               
+                
 
                 Console.WriteLine("Verifybot running");
 
@@ -164,6 +165,7 @@ namespace VerifyBot
 
             if (verify == null)
             {
+                Console.WriteLine("Service Object is null");
                 return;
             }
 

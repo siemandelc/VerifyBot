@@ -30,7 +30,7 @@ namespace VerifyBot
                 client.MessageReceived += MessageReceived;
                 client.UserJoined += UserJoined;                
 
-                this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), 60000, dayInterval);
+                this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
                 this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);               
                 
 

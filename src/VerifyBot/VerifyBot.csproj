@@ -23,8 +23,8 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.1" />
     <PackageReference Include="DL.GuildWars2Api" Version="1.0.0-CI00016" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="SimpleInjector" Version="4.0.8" />
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />

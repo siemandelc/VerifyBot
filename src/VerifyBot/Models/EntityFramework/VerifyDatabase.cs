@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,23 +16,31 @@ namespace VerifyBot.Models
 
         public async Task AddOrUpdateUser(string accountId, string apiKey, ulong discordId)
         {
-            var existingUser = Users.FirstOrDefault(x => x.AccountID == accountId);
+            try
+            {
+                var existingUser = Users.FirstOrDefault(x => x.AccountID == accountId);
 
-            if (existingUser != null)
-            {
-                existingUser.DiscordID = discordId;
-            }
-            else
-            {
-                Users.Add(new User()
+                if (existingUser != null)
                 {
-                    AccountID = accountId,
-                    APIKey = apiKey,
-                    DiscordID = discordId
-                });
-            }
+                    existingUser.DiscordID = discordId;
+                }
+                else
+                {
+                    Users.Add(new User()
+                    {
+                        AccountID = accountId,
+                        APIKey = apiKey,
+                        DiscordID = discordId
+                    });
+                }
 
-            await SaveChangesAsync();
+                await SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using DL.GuildWars2Api;
 using DL.GuildWars2Api.Models.V2;
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VerifyBot.Models;
@@ -151,7 +152,7 @@ namespace VerifyBot.Services
 
         private async Task ValidateCharacters()
         {           
-            if (Account.Access == "PlayForFree")
+            if (Account.Access.Count() == 0)
             {
                 var characters = await API.V2.Authenticated.GetCharactersAsync();
 

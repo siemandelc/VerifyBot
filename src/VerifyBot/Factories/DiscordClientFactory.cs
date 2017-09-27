@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.Net.Providers.WS4Net;
 //using Discord.Net.Providers.WS4Net;
 using Discord.WebSocket;
 using System;
@@ -18,8 +17,8 @@ namespace VerifyBot.Factories
             {
                 client = new DiscordSocketClient(new DiscordSocketConfig()
                 {
-                    LogLevel = LogSeverity.Info,
-                    WebSocketProvider = WS4NetProvider.Instance
+                    LogLevel = LogSeverity.Info
+                    //WebSocketProvider = WS4NetProvider.Instance
                 });
             }
             else

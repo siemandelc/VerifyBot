@@ -1,2 +1,7 @@
-﻿language: csharp
+language: csharp
+mono: none
+dotnet: 2.1.2
+dist: trusty
 solution: VerifyBot.sln
+script:
+ - dotnet restore

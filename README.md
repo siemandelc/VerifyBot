@@ -1,5 +1,5 @@
 # VerifyBot   
-
+[![Build Status](https://travis-ci.org/siemandelc/VerifyBot.svg?branch=master)](https://travis-ci.org/siemandelc/VerifyBot)
 A bot that uses the Discord.NET and Guild Wars 2 API's to verify what world a users account is on. Made for Jade Quarry Discord but open source for all to use.   
 
 You'll need a verified rank in Discord and a #verify text channel. When a user types !verify the bot will message them with instructions. Once a user is verified an entry is made into a SQLite database and the user is given the verified rank.

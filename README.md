@@ -1,5 +1,5 @@
 # VerifyBot   
-[![Build Status](https://travis-ci.org/siemandelc/VerifyBot.svg?branch=master)](https://travis-ci.org/siemandelc/VerifyBot)   
+[![Build Status](https://travis-ci.org/seasniffer/VerifyBot.svg?branch=master)](https://travis-ci.org/seasniffer/VerifyBot)   
 
 A bot that uses the Discord.NET and Guild Wars 2 API's to verify what world a users account is on. Made for Jade Quarry Discord but open source for all to use.   
 

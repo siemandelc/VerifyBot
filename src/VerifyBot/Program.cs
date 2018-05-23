@@ -18,6 +18,8 @@ namespace VerifyBot
         private Timer reminderTimer;
         private Timer reverifyTimer;
 
+        private DiscordSocketClient _client;
+
         public async Task Run()
         {
             try
@@ -25,15 +27,16 @@ namespace VerifyBot
                 this.CheckIfDatabaseExists();
                 this.LoadContainerAsync();
 
-                var client = container.GetInstance<DiscordSocketClient>();
+                _client = container.GetInstance<DiscordSocketClient>();
 
-                client.MessageReceived += MessageReceived;
-                client.UserJoined += UserJoined;                
+                _client.MessageReceived += MessageReceived;
+                _client.UserJoined += UserJoined;
+
+                _client.Disconnected += Disconnected;
 
                 this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
-                this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);               
+                this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);              
                 
-
                 Console.WriteLine("Verifybot running");
 
                 while (true)
@@ -70,6 +73,24 @@ namespace VerifyBot
             }
         }
 
+        private async Task Disconnected(Exception arg)
+        {
+            try
+            {
+                if (_client.ConnectionState == ConnectionState.Disconnected)
+                {
+                    _client.Dispose();
+                    _client = container.GetInstance<DiscordSocketClient>();
+                    await Task.Delay(1);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Serious exception, program will now close. Exception: {ex.Message}");
+                Environment.Exit(-1);
+            }
+        }
+
         private static void Main(string[] args) => new Program().Run().GetAwaiter().GetResult();
 
         private void CheckIfDatabaseExists()
@@ -81,11 +102,6 @@ namespace VerifyBot
                 Console.WriteLine("Database does not exist. Run the following command: dotnet ef database update");
                 throw new Exception("No Database");
             }
-        }
-
-        private Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
-        {
-            throw new NotImplementedException();
         }
 
         private void LoadContainerAsync()

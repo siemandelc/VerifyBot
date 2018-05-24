@@ -27,12 +27,7 @@ namespace VerifyBot
                 this.CheckIfDatabaseExists();
                 this.LoadContainerAsync();
 
-                _client = container.GetInstance<DiscordSocketClient>();
-
-                _client.MessageReceived += MessageReceived;
-                _client.UserJoined += UserJoined;
-
-                _client.Disconnected += Disconnected;
+                CreateConnection();
 
                 this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
                 this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);              
@@ -73,16 +68,39 @@ namespace VerifyBot
             }
         }
 
+        private void CreateConnection()
+        {
+            if (_client.ConnectionState == ConnectionState.Connected )
+            {
+                Console.WriteLine("client already connected");
+                return;
+            }
+
+            if (_client != null)
+            {
+                Console.WriteLine("Disposing of existing client");
+                _client.Dispose();                
+            }
+
+            Console.WriteLine("Creating new client");
+
+            _client = container.GetInstance<DiscordSocketClient>();
+
+            _client.MessageReceived += MessageReceived;
+            _client.UserJoined += UserJoined;
+            _client.Disconnected += Disconnected;
+
+            Console.WriteLine("client created & events wired");
+        }
+
         private async Task Disconnected(Exception arg)
         {
+            Console.WriteLine($"Client disconnected: {arg.Message}");
+
             try
             {
-                if (_client.ConnectionState == ConnectionState.Disconnected)
-                {
-                    _client.Dispose();
-                    _client = container.GetInstance<DiscordSocketClient>();
-                    await Task.Delay(1);
-                }
+                await Task.Delay(1);
+                CreateConnection();
             }
             catch (Exception ex)
             {

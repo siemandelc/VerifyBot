@@ -70,12 +70,6 @@ namespace VerifyBot
 
         private void CreateConnection()
         {
-            if (_client.ConnectionState == ConnectionState.Connected )
-            {
-                Console.WriteLine("client already connected");
-                return;
-            }
-
             if (_client != null)
             {
                 Console.WriteLine("Disposing of existing client");

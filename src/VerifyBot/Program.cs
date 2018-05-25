@@ -70,12 +70,6 @@ namespace VerifyBot
 
         private void CreateConnection()
         {
-            if (_client != null)
-            {
-                Console.WriteLine("Disposing of existing client");
-                _client.Dispose();                
-            }
-
             Console.WriteLine("Creating new client");
 
             _client = container.GetInstance<DiscordSocketClient>();
@@ -93,6 +87,8 @@ namespace VerifyBot
 
             try
             {
+                Console.WriteLine("Disposing of connection");
+                _client.Dispose();
                 await Task.Delay(1);
                 CreateConnection();
             }
@@ -124,7 +120,7 @@ namespace VerifyBot
             container.Register(ConfigurationFactory.Get, Lifestyle.Singleton);
 
             //// Client object
-            container.Register(() => DiscordClientFactory.Get(ConfigurationFactory.Get()).Result, Lifestyle.Singleton);
+            container.Register(() => DiscordClientFactory.Get(ConfigurationFactory.Get()).Result, Lifestyle.Transient);
 
             //// Userstrings
             container.Register(UserStringsFactory.Get, Lifestyle.Singleton);

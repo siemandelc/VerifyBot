@@ -27,7 +27,15 @@ namespace VerifyBot
                 this.CheckIfDatabaseExists();
                 this.LoadContainerAsync();
 
-                CreateConnection();
+                Console.WriteLine("Creating new client");
+
+                _client = container.GetInstance<DiscordSocketClient>();
+
+                _client.MessageReceived += MessageReceived;
+                _client.UserJoined += UserJoined;
+                _client.Disconnected += Disconnected;
+
+                Console.WriteLine("client created & events wired");
 
                 this.reverifyTimer = new Timer(this.RunVerification, container.GetInstance<ReverifyService>(), dayInterval, dayInterval);
                 this.reminderTimer = new Timer(this.RemindVerify, container.GetInstance<RemindVerifyService>(), dayInterval, dayInterval * 2);              
@@ -68,29 +76,33 @@ namespace VerifyBot
             }
         }
 
-        private void CreateConnection()
-        {
-            Console.WriteLine("Creating new client");
-
-            _client = container.GetInstance<DiscordSocketClient>();
-
-            _client.MessageReceived += MessageReceived;
-            _client.UserJoined += UserJoined;
-            _client.Disconnected += Disconnected;
-
-            Console.WriteLine("client created & events wired");
-        }
-
         private async Task Disconnected(Exception arg)
         {
             Console.WriteLine($"Client disconnected: {arg.Message}");
 
             try
             {
-                Console.WriteLine("Disposing of connection");
-                _client.Dispose();
-                await Task.Delay(1);
-                CreateConnection();
+                var config = container.GetInstance<Configuration>();
+
+                await _client.LoginAsync(TokenType.Bot, config.DiscordToken);
+                await _client.StartAsync();
+
+                var ready = false;
+                _client.Ready += () =>
+                {
+                    ready = true;
+                    return Task.CompletedTask;
+                };
+
+                Console.WriteLine("Waiting for DiscordSocketClient to initialize...");
+
+                while (!ready)
+                {
+                    await Task.Delay(1000);
+                    Console.WriteLine("Waiting...");
+                }
+
+                Console.WriteLine(" DiscordSocketClient initialized.");
             }
             catch (Exception ex)
             {
@@ -120,7 +132,7 @@ namespace VerifyBot
             container.Register(ConfigurationFactory.Get, Lifestyle.Singleton);
 
             //// Client object
-            container.Register(() => DiscordClientFactory.Get(ConfigurationFactory.Get()).Result, Lifestyle.Transient);
+            container.Register(() => DiscordClientFactory.Get(ConfigurationFactory.Get()).Result, Lifestyle.Singleton);
 
             //// Userstrings
             container.Register(UserStringsFactory.Get, Lifestyle.Singleton);

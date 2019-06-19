@@ -79,6 +79,7 @@ namespace VerifyBot
         private async Task Disconnected(Exception arg)
         {
             Console.WriteLine($"Client disconnected: {arg.Message}");
+            Environment.Exit(1);
 
             try
             {
@@ -206,6 +207,8 @@ namespace VerifyBot
             }
 
             await verify.Process();
+
+            Environment.Exit(-1);
         }
 
         private async Task UserJoined(SocketGuildUser userCandidate)

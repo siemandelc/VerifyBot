@@ -113,41 +113,49 @@ namespace VerifyBot.Services
 
         private async Task ValidateAccount(bool isReverify)
         {
-            var account = await API.V2.Authenticated.GetAccountAsync();
+            try
+            {
+                var account = await API.V2.Authenticated.GetAccountAsync();
 
-            if (account == null)
-            {
-                await SendMessageAsync(this.strings.AccountNotInAPI);
-                Console.WriteLine($"Could not verify {Requestor.Username} - Cannont access account in GW2 API.");
-                return;
-            }
-
-            if (isReverify)
-            {
-                if (account.Id != AccoutId)
-                {                    
-                    Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account ID.");
-                    return;
-                }
-            }
-            else
-            {
-                if (account.Name != AccountName)
+                if (account == null)
                 {
-                    await SendMessageAsync(this.strings.AccountNameDoesNotMatch);
-                    Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account. (Case matters)");
+                    await SendMessageAsync(this.strings.AccountNotInAPI);
+                    Console.WriteLine($"Could not verify {Requestor.Username} - Cannont access account in GW2 API.");
                     return;
                 }
-            }
 
-            if (!Manager.IsAccountOnOurWorld(account))
+                if (isReverify)
+                {
+                    if (account.Id != AccoutId)
+                    {                    
+                        Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account ID.");
+                        return;
+                    }
+                }
+                else
+                {
+                    if (account.Name != AccountName)
+                    {
+                        await SendMessageAsync(this.strings.AccountNameDoesNotMatch);
+                        Console.WriteLine($"Could not verify {Requestor.Username} - API Key account does not match supplied account. (Case matters)");
+                        return;
+                    }
+                }
+
+                if (!Manager.IsAccountOnOurWorld(account))
+                {
+                    await SendMessageAsync(this.strings.AccountNotOnServer);
+                    Console.WriteLine($"Could not verify {Requestor.Username} - Not on Server.");
+                    return;
+                }
+
+                Account = account;
+            }
+            catch (Exception ex)
             {
-                await SendMessageAsync(this.strings.AccountNotOnServer);
-                Console.WriteLine($"Could not verify {Requestor.Username} - Not on Server.");
+                Console.WriteLine($"Exception: {ex.Message}");
                 return;
             }
-
-            Account = account;
         }
 
         private async Task ValidateCharacters()
